@@ -25,6 +25,8 @@ import java.nio.channels.WritableByteChannel;
  * Extended interface for a resource that supports writing to it.
  * Provides an {@link #getOutputStream() OutputStream accessor}.
  *
+ * <p>支持写入资源的扩展接口。提供 OutputStream 访问器。
+ *
  * @author Juergen Hoeller
  * @since 3.1
  * @see java.io.OutputStream
@@ -38,6 +40,9 @@ public interface WritableResource extends Resource {
 	 * note that actual content writing may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be modified.
+	 *
+	 * <p>指示是否可以通过 getOutputStream() 写入此资源的内容。
+	 * <p>对于典型的资源描述符，该值为 true；请注意，尝试写入实际内容时仍可能失败。但是，false 值明确表示无法修改资源内容。
 	 * @see #getOutputStream()
 	 * @see #isReadable()
 	 */
@@ -48,6 +53,7 @@ public interface WritableResource extends Resource {
 	/**
 	 * Return an {@link OutputStream} for the underlying resource,
 	 * allowing to (over-)write its content.
+	 * <p>返回底层资源的 OutputStream，允许（覆盖）写其内容。
 	 * @throws IOException if the stream could not be opened
 	 * @see #getInputStream()
 	 */
@@ -58,6 +64,10 @@ public interface WritableResource extends Resource {
 	 * <p>It is expected that each call creates a <i>fresh</i> channel.
 	 * <p>The default implementation returns {@link Channels#newChannel(OutputStream)}
 	 * with the result of {@link #getOutputStream()}.
+	 *
+	 * <p>返回一个 WritableByteChannel。
+	 * <p>预计每次调用都会创建一个新的通道。
+	 * <p>默认实现返回使用 getOutputStream() 结果的 Channels.newChannel(OutputStream) 。
 	 * @return the byte channel for the underlying resource (must not be {@code null})
 	 * @throws java.io.FileNotFoundException if the underlying resource doesn't exist
 	 * @throws IOException if the content channel could not be opened

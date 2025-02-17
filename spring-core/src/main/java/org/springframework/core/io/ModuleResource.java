@@ -35,6 +35,11 @@ import org.springframework.util.StringUtils;
  * In common scenarios, module resources will simply be transparently visible as
  * classpath resources and therefore do not need any special treatment at all.
  *
+ * <p>用于 Module 解析的 Resource 实现， 通过执行 getInputStream() 访问 Module.getResourceAsStream(java.lang.String)。
+ * <p>或者，考虑通过访问模块路径布局中的资源 ClassPathResource 用于导出的资源，或者通过以下方式专门与 Class
+ * 相关 ClassPathResource(String, Class) 用于该特定类的包含模块内的本地解析。 在常见场景中，模块资源将简单地透明可见，
+ * 如下所示 类路径资源，因此根本不需要任何特殊处理。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 6.1

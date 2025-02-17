@@ -49,6 +49,12 @@ import org.springframework.util.Assert;
  * This {@code PathResource} is effectively a pure {@code java.nio.path.Path}
  * based alternative with different {@code createRelative} behavior.
  *
+ * <p>Path 句柄的 Resource 实现， 通过 Path API 执行所有操作和转换。 支持解析为 File 和 URL 。
+ * 实现扩展的 WritableResource 接口。
+ * <p>注意：从 5.1 开始， FileSystemResource 中也提供了 Path 支持，应用 Spring 标准的基于字符串的路径转换，
+ * 但通过 Files API 执行所有操作。这个 PathResource 实际上是一个纯 java.nio.path.Path
+ * 基于具有不同 createRelative 行为的替代方案。
+ *
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
@@ -66,6 +72,10 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
 	 * the given root: for example, Paths.get("C:/dir1/"), relative path "dir2" &rarr; "C:/dir1/dir2"!
+	 *
+	 * <p>从 Path 句柄创建新的 PathResource。
+	 * <p>注意：与 FileSystemResource 不同，通过 createRelative 构建相对资源时，相对路径将在给定的根下构建：
+	 * 例如，Paths.get("C:/dir1/")，相对路径“dir2”→“C:/dir1/dir2”！
 	 * @param path a Path handle
 	 */
 	public PathResource(Path path) {

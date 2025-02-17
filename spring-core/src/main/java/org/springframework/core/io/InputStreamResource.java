@@ -47,6 +47,15 @@ import org.springframework.util.Assert;
  * class; this is particularly true when used with Spring's web resource rendering
  * which specifically skips {@code #contentLength()} for this exact class only.
  *
+ * <p>给定 InputStream 或给定 InputStreamSource （可以作为 lambda 表达式提供） 提供惰性 InputStream 的 Resource 实现 。
+ * <p>仅当没有其他特定Resource实现适用时才应使用。特别是，如果可能的话，更推荐 ByteArrayResource
+ * 或任何基于文件的Resource实现。如果需要多次获取自定义流，请使用自定义 AbstractResource 子类和相应的getInputStream()实现。
+ * <p>与其他Resource实现相比，这是一个已打开资源的描述符 - 因此isOpen()返回true 。如果您需要将资源描述符保留在某处，
+ * 或者需要多次从流中读取，请勿使用InputStreamResource 。这也适用于使用InputStreamSource构造的情况它延迟获取流，但也只允许单次访问。
+ * <p>注意：该类不提供独立的AbstractResource.contentLength()实现：任何此类调用都将消耗给定的InputStream ！
+ * 如果可能，请考虑使用自定义实现覆盖#contentLength() 。出于任何其他目的，不建议从此类进行扩展；当与 Spring 的 Web
+ * 资源渲染一起使用时尤其如此，它专门跳过这个类的#contentLength() 。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003

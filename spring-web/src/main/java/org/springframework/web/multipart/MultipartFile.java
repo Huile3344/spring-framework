@@ -35,6 +35,10 @@ import org.springframework.util.FileCopyUtils;
  * session-level or persistent store as and if desired. The temporary storage
  * will be cleared at the end of request processing.
  *
+ * <p>在 multipart 请求中收到的已上传文件的表示。
+ * <p>文件内容存储在内存中或临时存储在磁盘上。无论哪种情况，用户都有责任根据需要将文件内容
+ * 复制到会话级或持久性存储中。临时存储将在请求处理结束时清除。
+ *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
  * @since 29.09.2003
@@ -45,6 +49,7 @@ public interface MultipartFile extends InputStreamSource {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
+	 * <p>以 multipart 形式返回参数的名称。
 	 * @return the name of the parameter (never {@code null} or empty)
 	 */
 	String getName();
@@ -59,6 +64,11 @@ public interface MultipartFile extends InputStreamSource {
 	 * as ".." and others that can be used maliciously. It is recommended to not
 	 * use this filename directly. Preferably generate a unique one and save
 	 * this one somewhere for reference, if necessary.
+	 *
+	 * <p>返回客户端文件系统中的原始文件名。
+	 * <p>这可能包含路径信息，具体取决于所使用的浏览器，但通常不会包含除 Opera 之外的任何其他浏览器的路径信息。
+	 * <p>注意：请记住，此文件名由客户端提供，不应盲目使用。除了不使用目录部分外，文件名还可能包含“..”等可恶意使用的字符。
+	 * 建议不要直接使用此文件名。最好生成一个唯一的文件名，并将其保存在某处以供参考（如有必要）。
 	 * @return the original filename, or the empty String if no file has been chosen
 	 * in the multipart form, or {@code null} if not defined or not available
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
@@ -97,6 +107,10 @@ public interface MultipartFile extends InputStreamSource {
 	/**
 	 * Return an InputStream to read the contents of the file from.
 	 * <p>The user is responsible for closing the returned stream.
+	 *
+	 * <p>返回一个 InputStream 来读取文件的内容。
+	 * <p>用户负责关闭返回的流。
+	 *
 	 * @return the contents of the file as stream, or an empty stream if empty
 	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
@@ -107,6 +121,9 @@ public interface MultipartFile extends InputStreamSource {
 	 * Return a Resource representation of this MultipartFile. This can be used
 	 * as input to the {@code RestTemplate} or the {@code WebClient} to expose
 	 * content length and the filename along with the InputStream.
+	 *
+	 * <p>返回此 MultipartFile 的资源表示。这可以用作 RestTemplate 或 WebClient 的输入，
+	 * 以显示内容长度和文件名以及 InputStream。
 	 * @return this MultipartFile adapted to the Resource contract
 	 * @since 5.1
 	 */
@@ -127,6 +144,13 @@ public interface MultipartFile extends InputStreamSource {
 	 * destinations specified here (for example, with Servlet multipart handling).
 	 * For absolute destinations, the target file may get renamed/moved from its
 	 * temporary location or newly copied, even if a temporary copy already exists.
+	 *
+	 * <p>将接收到的文件传输到给定的目标文件。
+	 * <p>这可以移动文件系统中的文件、复制文件系统中的文件或将内存中的内容保存到目标文件。如果目标文件已经存在，则将首先删除它。
+	 * <p>如果目标文件已在文件系统中移动，则此后无法再次调用此操作。因此，只需调用此方法一次即可使用任何存储机制。
+	 * <p>注意：根据底层提供程序，临时存储可能依赖于容器，包括此处指定的相对目标的基本目录（例如，使用 Servlet 多部分处理）。
+	 * 对于绝对目标，即使临时副本已经存在，目标文件也可能被重命名/从其临时位置移动或重新复制。
+	 *
 	 * @param dest the destination file (typically absolute)
 	 * @throws IOException in case of reading or writing errors
 	 * @throws IllegalStateException if the file has already been moved
@@ -138,6 +162,9 @@ public interface MultipartFile extends InputStreamSource {
 	/**
 	 * Transfer the received file to the given destination file.
 	 * <p>The default implementation simply copies the file input stream.
+	 *
+	 * <p>将接收到的文件传输到给定的目标文件。
+	 * 默认实现只是复制文件输入流。
 	 * @since 5.1
 	 * @see #getInputStream()
 	 * @see #transferTo(File)

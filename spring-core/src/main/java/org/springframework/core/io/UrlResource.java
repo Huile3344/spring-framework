@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
  * Supports resolution as a {@code URL} and also as a {@code File} in
  * case of the {@code "file:"} protocol.
  *
+ * <p>java.net.URL定位器的 Resource 实现。支持解析为URL ，也支持解析为File （如果使用"file:"协议）。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003

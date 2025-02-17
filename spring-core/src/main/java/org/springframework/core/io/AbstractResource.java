@@ -41,6 +41,10 @@ import org.springframework.util.ResourceUtils;
  * be opened; "isOpen" will always return false; "getURL" and "getFile"
  * throw an exception; and "toString" will return the description.
  *
+ * <p>Resource 实现的便捷基类， 预先实现典型行为。
+ * <p>“exists”方法将检查文件或输入流是否可以打开；
+ * “isOpen”将始终返回 false； “getURL”和“getFile”抛出异常；和“toString”将返回描述。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003
@@ -51,6 +55,8 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation checks whether a File can be opened,
 	 * falling back to whether an InputStream can be opened.
 	 * <p>This will cover both directories and content resources.
+	 * <p>此实现检查是否可以打开文件，然后返回是否可以打开 InputStream。
+	 * <p>这将涵盖目录和内容资源。
 	 */
 	@Override
 	public boolean exists() {
@@ -137,6 +143,9 @@ public abstract class AbstractResource implements Resource {
 	 * with the result of {@link #getInputStream()}.
 	 * <p>This is the same as in {@link Resource}'s corresponding default method
 	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
+	 *
+	 * <p>此实现返回 getInputStream() 结果的 Channels.newChannel(InputStream) 。
+	 * <p>这与 Resource 的相应默认方法相同，但在此处进行了镜像，以便在类层次结构中进行高效的 JVM 级调度。
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
@@ -149,6 +158,9 @@ public abstract class AbstractResource implements Resource {
 	 * recommend overriding this method with a more optimal implementation, for example,
 	 * checking File length, or possibly simply returning -1 if the stream can
 	 * only be read once.
+	 * <p>此方法读取整个 InputStream 以确定内容长度。
+	 * <p>对于 InputStreamResource 的自定义子类，我们强烈建议使用更优化的实现覆盖此方法，
+	 * 例如检查文件长度，或者如果流只能读取一次，则可能简单地返回 -1。
 	 * @see #getInputStream()
 	 */
 	@Override

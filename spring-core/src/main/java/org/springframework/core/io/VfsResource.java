@@ -33,6 +33,9 @@ import org.springframework.util.ResourceUtils;
  * (package {@code org.jboss.vfs}) and is in particular compatible with
  * JBoss AS 7 and WildFly 8+.
  *
+ * <p>基于 JBoss VFS 的 Resource 实现。
+ * <p>从 Spring 4.0 开始，此类支持 JBoss AS 6+（包org.jboss.vfs ）上的 VFS 3.x，特别是与 JBoss AS 7 和 WildFly 8+ 兼容。
+ *
  * @author Ales Justin
  * @author Juergen Hoeller
  * @author Costin Leau

@@ -35,6 +35,9 @@ import org.springframework.util.StringUtils;
  * resource resides in the file system, but not for resources in a JAR.
  * Always supports resolution as {@code java.net.URL}.
  *
+ * <p>类路径资源的 Resource 实现。使用任一给定的 ClassLoader 或给定的用于加载资源的 Class 。
+ * <p>如果类路径资源驻留在文件系统中，则支持解析为java.io.File ，但不支持 JAR 中的资源。始终支持解析为java.net.URL 。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003

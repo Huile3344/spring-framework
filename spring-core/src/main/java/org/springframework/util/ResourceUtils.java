@@ -39,6 +39,11 @@ import org.springframework.lang.Nullable;
  * object, which in turn allows one to obtain a {@code java.io.File} in the
  * file system through its {@code getFile()} method.
  *
+ * <p>用于将资源位置解析为文件系统中的文件的实用方法。主要用于框架内部使用。
+ * <p>考虑使用核心包中的 Spring 资源抽象来以统一的方式处理所有类型的文件资源。
+ * org.springframework.core.io.ResourceLoader 的 getResource() 方法可以将任何位置解析为
+ * org.springframework.core.io.Resource 对象，进而允许通过其 getFile() 方法获取文件系统中的 java.io.File。
+ *
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see org.springframework.core.io.Resource

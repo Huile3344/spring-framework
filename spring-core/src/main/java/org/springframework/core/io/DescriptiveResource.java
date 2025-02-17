@@ -29,6 +29,9 @@ import org.springframework.lang.Nullable;
  * <p>To be used as placeholder if a {@code Resource} argument is
  * expected by an API but not necessarily used for actual reading.
  *
+ * <p>保存资源描述的简单 Resource 实现 但并不指向实际可读的资源。
+ * <p>如果 API 需要Resource参数但不一定用于实际读取，则用作占位符。
+ *
  * @author Juergen Hoeller
  * @since 1.2.6
  */

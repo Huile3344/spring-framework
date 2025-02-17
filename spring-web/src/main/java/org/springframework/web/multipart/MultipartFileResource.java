@@ -28,6 +28,9 @@ import org.springframework.util.Assert;
  * exposing the content as {@code InputStream} and also overriding
  * {@link #contentLength()} as well as {@link #getFilename()}.
  *
+ * <p>将 MultipartFile 适配到 org.springframework.core.io.Resource，
+ * 将内容公开为 InputStream，并覆盖 contentLength() 和 getFilename()。
+ *
  * @author Rossen Stoyanchev
  * @since 5.1
  * @see MultipartFile#getResource()

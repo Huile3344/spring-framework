@@ -40,6 +40,10 @@ import org.springframework.util.ResourceUtils;
  * <p>Alternatively, for direct construction from a {@link java.io.File} handle
  * or NIO {@link java.nio.file.Path}, consider using {@link FileSystemResource}.
  *
+ * <p>UrlResource 的子类，假定文件解析，并为其实现 WritableResource 接口。这个资源变体还缓存getFile()解析的File句柄。
+ * <p>这是由 DefaultResourceLoader 解析为“file:...”URL 位置的类，允许向下转型为 WritableResource 。
+ * <p>或者，对于从 File 句柄或 NIO Path直接构建，请考虑使用 FileSystemResource 。
+ *
  * @author Juergen Hoeller
  * @since 5.0.2
  */

@@ -23,6 +23,9 @@ package org.springframework.core.io;
  * without an explicit prefix, hence applying relative to the local
  * {@link ResourceLoader}'s context).
  *
+ * <p>从封闭的“上下文”加载资源的扩展接口，例如从 ServletContext 加载，但也能来自普通类路径路径或
+ * 相对文件系统路径（指定没有显式前缀，因此相对于本地应用 ResourceLoader 的上下文）。
+ *
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.springframework.web.context.support.ServletContextResource
@@ -33,6 +36,9 @@ public interface ContextResource extends Resource {
 	 * Return the path within the enclosing 'context'.
 	 * <p>This is typically path relative to a context-specific root directory,
 	 * for example, a ServletContext root or a PortletContext root.
+	 *
+	 * <p>返回封闭“上下文”内的路径。
+	 * <p>这通常是相对于特定于上下文的根目录的路径，例如 ServletContext 根或 PortletContext 根。
 	 */
 	String getPathWithinContext();
 

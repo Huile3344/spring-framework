@@ -34,6 +34,11 @@ import org.springframework.util.Assert;
  * Particularly useful for creating mail attachments from local content,
  * where JavaMail needs to be able to read the stream multiple times.
  *
+ * <p>给定字节数组的 Resource 实现。
+ * <p>为给定的字节数组创建 ByteArrayInputStream 。
+ * <p>对于从任何给定的字节数组加载内容很有用，而不必求助于一次性的 InputStreamResource 。
+ * 对于从本地内容创建邮件附件特别有用，其中 JavaMail 需要能够多次读取流。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.3

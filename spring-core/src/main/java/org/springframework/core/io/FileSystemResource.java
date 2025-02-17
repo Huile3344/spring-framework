@@ -50,6 +50,11 @@ import org.springframework.util.StringUtils;
  * in which case it will perform all file system interactions via NIO.2, only
  * resorting to {@link File} on {@link #getFile()}.
  *
+ * <p>java.io.File和 java.nio.file.Path句柄的文件系统目标的 Resource 实现。 支持解析为File和URL 。
+ * 实现扩展的 WritableResource 接口。
+ * <p>注意：此 Resource 实现使用 NIO.2 API 进行读/写交互，并且可以使用 Path 句柄构造，在这种情况下，
+ * 它将通过 NIO.2 执行所有文件系统交互，只能依靠getFile()上的 File 。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003
@@ -77,6 +82,11 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * will be built underneath that root: for example, relative path "dir2" &rarr;
 	 * "C:/dir1/dir2". In the case of "C:/dir1", relative paths will apply
 	 * at the same directory level: relative path "dir2" &rarr; "C:/dir2".
+	 *
+	 * <p>从文件路径创建新的 FileSystemResource。
+	 * <p>注意：通过 createRelative 构建相对资源时，此处指定的资源基路径是否以斜杠结尾会产生影响。
+	 * 对于“C:/dir1/”，将在该根目录下构建相对路径：例如，相对路径“dir2”→“C:/dir1/dir2”。对于“C:/dir1”，
+	 * 将在同一目录级别应用相对路径：相对路径“dir2”→“C:/dir2”。
 	 * @param path a file path
 	 * @see #FileSystemResource(Path)
 	 */
@@ -96,6 +106,11 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * use the {@link #FileSystemResource(String) constructor with a file path}
 	 * to append a trailing slash to the root path: "C:/dir1/", which indicates
 	 * this directory as root for all relative paths.
+	 *
+	 * <p>从文件句柄创建新的 FileSystemResource。
+	 * <p>注意：通过 createRelative 构建相对资源时，相对路径将应用于同一目录级别：
+	 * 例如，new File("C:/dir1")，相对路径“dir2”→“C:/dir2”！如果您希望在给定的根目录下构建相对路径，
+	 * 请使用带有文件路径的构造函数在根路径后附加一个斜杠：“C:/dir1/”，表示此目录为所有相对路径的根目录。
 	 * @param file a File handle
 	 * @see #FileSystemResource(Path)
 	 * @see #getFile()
@@ -122,6 +137,15 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * this directory as root for all relative paths. Alternatively, consider
 	 * using {@link PathResource#PathResource(Path)} for {@code java.nio.path.Path}
 	 * resolution in {@code createRelative}, always nesting relative paths.
+	 *
+	 * <p>从 Path 句柄创建新的 FileSystemResource，通过 NIO.2 而不是 File 执行所有文件系统交互。
+	 * <p>与 PathResource 相比，此变体严格遵循一般的 FileSystemResource 约定，
+	 * 特别是在路径清理和 createRelative(String) 处理方面。
+	 * <p>注意：通过 createRelative 构建相对资源时，相对路径将应用于同一目录级别：
+	 * 例如，Paths.get("C:/dir1")，相对路径“dir2”→“C:/dir2”！如果您希望在给定的根目录下构建相对路径，
+	 * 请使用带有文件路径的构造函数在根路径后附加一个尾部斜杠：“C:/dir1/”，这表示此目录是所有相对路径的根目录。
+	 * 或者，考虑在 createRelative 中使用 PathResource.PathResource(Path) 进行 java.nio.path.Path 解析，
+	 * 始终嵌套相对路径。
 	 * @param filePath a Path handle to a file
 	 * @since 5.1
 	 * @see #FileSystemResource(File)
@@ -138,6 +162,9 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * locating the specified path.
 	 * <p>This is an alternative to {@link #FileSystemResource(String)},
 	 * performing all file system interactions via NIO.2 instead of {@link File}.
+	 *
+	 * <p>从 FileSystem 句柄创建新的 FileSystemResource，定位指定路径。
+	 * <p>这是 FileSystemResource(String) 的替代方案，通过 NIO.2 而不是 File 执行所有文件系统交互。
 	 * @param fileSystem the FileSystem to locate the path within
 	 * @param path a file path
 	 * @since 5.1.1

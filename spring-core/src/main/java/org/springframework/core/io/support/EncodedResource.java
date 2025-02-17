@@ -35,6 +35,9 @@ import org.springframework.util.ObjectUtils;
  * <p>Used as an argument for operations that support reading content with
  * a specific encoding, typically via a {@code java.io.Reader}.
  *
+ *  <p>将资源描述符与特定编码或字符集相结合以用于从资源中读取的持有者。
+ *  <p>用作支持读取具有特定编码的内容的操作的参数，通常通过 java.io.Reader。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Arjen Poutsma

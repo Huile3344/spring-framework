@@ -27,6 +27,8 @@ import org.springframework.util.function.ThrowingConsumer;
  * Adapter class to convert a {@link ThrowingConsumer} of {@link Appendable} to
  * an {@link InputStreamSource}.
  *
+ *  <p>将 Appendable 的 ThrowingConsumer 转换为 InputStreamSource 的适配器类。
+ *
  * @author Phillip Webb
  * @since 6.0
  */

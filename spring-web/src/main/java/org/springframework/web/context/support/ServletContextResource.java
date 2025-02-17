@@ -43,6 +43,9 @@ import org.springframework.web.util.WebUtils;
  * {@code java.io.File} access when the web application archive
  * is expanded.
  *
+ * <p>ServletContext 资源的资源实现，解释 Web 应用程序根目录内的相对路径。
+ * <p>始终支持流访问和 URL 访问，但仅在扩展 Web 应用程序存档时允许 java.io.File 访问。
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see jakarta.servlet.ServletContext#getResourceAsStream
