@@ -50,6 +50,11 @@ import org.springframework.lang.Nullable;
  * <p>If necessary, a {@code MergedAnnotation} can be {@linkplain #synthesize()
  * synthesized} back into an actual {@link java.lang.annotation.Annotation}.
  *
+ * <p>从 MergedAnnotations 集合返回的单个合并注解。呈现注解视图，其中属性值可能已从不同的源值“合并”。
+ * <p>可以使用各种 get 方法访问属性值。例如，要访问 int 属性，可以使用 getInt(String) 方法。
+ * <p>请注意，访问时不会转换属性值。例如，如果底层属性是 int，则无法调用 getString(String)。此规则的唯一例外是 Class 和 Class[] 值，它们可以分别作为 String 和 String[] 访问，以防止潜在的早期类初始化。
+ * <p>如有必要，可以将 MergedAnnotation 合成回实际注解。
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -62,12 +67,14 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * The attribute name for annotations with a single element.
+	 * <p>具有单个元素的注解的属性名称
 	 */
 	String VALUE = "value";
 
 
 	/**
 	 * Get the {@code Class} reference for the actual annotation type.
+	 * <p>获取实际注解类型的类引用。
 	 * @return the annotation type
 	 */
 	Class<A> getType();
@@ -77,6 +84,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * {@linkplain #isDirectlyPresent() directly present} and
 	 * {@linkplain #isMetaPresent() meta-present} annotations within the context
 	 * of the {@link SearchStrategy} used.
+	 * 
+	 * <p>确定注解是否存在于源中。考虑在所使用的 MergedAnnotations.SearchStrategy 上下文中直接存在和元存在的注解。
+	 * 
 	 * @return {@code true} if the annotation is present
 	 */
 	boolean isPresent();
@@ -86,6 +96,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>A directly present annotation is one that the user has explicitly
 	 * declared and not one that is {@linkplain #isMetaPresent() meta-present}
 	 * or {@link Inherited @Inherited}.
+	 * 
+	 * <p>确定注解是否直接存在于源上。
+	 * <p>直接存在的注解是用户明确声明的注解，而不是元存在或 @Inherited 的注解。
+	 * 
 	 * @return {@code true} if the annotation is directly present
 	 */
 	boolean isDirectlyPresent();
@@ -95,6 +109,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>A meta-present annotation is an annotation that the user hasn't
 	 * explicitly declared, but has been used as a meta-annotation somewhere in
 	 * the annotation hierarchy.
+	 * 
+	 * <p>确定注解是否在源上是元注解。
+	 * <p>元注解是用户未明确声明但已在注解层次结构中的某个位置用作元注解的注解。
+	 * 
 	 * @return {@code true} if the annotation is meta-present
 	 */
 	boolean isMetaPresent();
@@ -106,6 +124,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * meta-annotation has a distance of {@code 1}, a meta-annotation on a
 	 * meta-annotation has a distance of {@code 2}, etc. A {@linkplain #missing()
 	 * missing} annotation will always return a distance of {@code -1}.
+	 *
+	 * <p>获取此注解其用作元注解相关的距离。
+	 * <p>直接声明的注解的距离为 0，元注解的距离为 1，元注解上的元注解的距离为 2，等等。缺失的注解将始终返回 -1 的距离。
+	 *
 	 * @return the annotation distance or {@code -1} if the annotation is missing
 	 */
 	int getDistance();
@@ -116,6 +138,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * higher priority to annotations declared on a superclass or interface. A
 	 * {@linkplain #missing() missing} annotation will always return an aggregate
 	 * index of {@code -1}.
+	 * 
+	 * <p>获取包含此注解的聚合集合的索引。
+	 * <p>可用于对注解流进行重新排序，例如，赋予在超类或接口上声明的注解更高的优先级。缺失的注解将始终返回聚合索引 -1。
+	 * 
 	 * @return the aggregate index (starting at {@code 0}) or {@code -1} if the
 	 * annotation is missing
 	 */
@@ -131,6 +157,12 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * can be of any type, but should have a sensible {@code toString()}.
 	 * Meta-annotations will always return the same source as the
 	 * {@link #getRoot() root}.
+	 * 
+	 * <p>获取最终声明根注解的源，如果源未知，则返回 null。
+	 * <p>如果此合并注解是从 AnnotatedElement 创建的，则此源将是相同类型的元素。
+	 * 如果注解是在未使用反射的情况下加载的，则源可以是任何类型，但应具有合理的 toString()。
+	 * 元注解将始终返回与根相同的源。
+	 * 
 	 * @return the source, or {@code null}
 	 */
 	@Nullable
@@ -141,6 +173,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * annotation is not {@linkplain #isMetaPresent() meta-present}.
 	 * <p>The meta-source is the annotation that was meta-annotated with this
 	 * annotation.
+	 *
+	 * <p>获取元注解的来源，如果注解不是元注解，则返回 null。
+	 * <p>元源是使用此注解进行元注解的注解。
+	 *
 	 * @return the meta-annotation source or {@code null}
 	 * @see #getRoot()
 	 */
@@ -150,6 +186,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}
 	 * annotation as directly declared on the source.
+	 *
+	 * <p>获取根注解，即在源上直接声明的距离是 0 的注解。
+	 *
 	 * @return the root annotation
 	 * @see #getMetaSource()
 	 */
@@ -159,6 +198,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Get the complete list of annotation types within the annotation hierarchy
 	 * from this annotation to the {@link #getRoot() root}.
 	 * <p>Provides a useful way to uniquely identify a merged annotation instance.
+	 * 
+	 * <p>获取从此注解到根的注解层次结构中的注解类型的完整列表。
+	 * <p>提供一种有用的方式来唯一地标识合并的注解实例。
+	 * 
 	 * @return the meta types for the annotation
 	 * @see MergedAnnotationPredicates#unique(Function)
 	 * @see #getRoot()
@@ -170,6 +213,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Determine if the specified attribute name has a non-default value when
 	 * compared to the annotation declaration.
+	 * 
+	 * <p>确定指定的属性名称与注解声明相比是否具有非默认值。
+	 * 
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is different from the default
 	 * value
@@ -179,6 +225,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Determine if the specified attribute name has a default value when compared
 	 * to the annotation declaration.
+	 *
+	 * <p>确定指定的属性名称与注解声明相比是否具有默认值。
+	 *
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is the same as the default
 	 * value
@@ -187,6 +236,9 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Get a required byte attribute value from the annotation.
+	 *
+	 * <p>从注解中获取所需的字节属性值。
+	 *
 	 * @param attributeName the attribute name
 	 * @return the value as a byte
 	 * @throws NoSuchElementException if there is no matching attribute
@@ -404,6 +456,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
+	 *
+	 * <p>按照注解声明中所指定的属性名从注解中获取默认属性值。
+	 *
 	 * @param attributeName the attribute name
 	 * @return an optional of the default value or {@link Optional#empty()} if
 	 * there is no matching attribute or no defined default
@@ -413,6 +468,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
+	 *
+	 * <p>按照注解声明中所指定的属性名从注解中获取默认属性值。
+	 *
 	 * @param attributeName the attribute name
 	 * @param type the attribute type. Must be compatible with the underlying
 	 * attribute type or {@code Object.class}.
@@ -424,6 +482,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation with all attributes that have default
 	 * values removed.
+	 *
+	 * <p>创建注解的新视图，并删除所有属性的默认值。
+	 *
 	 * @return a filtered view of the annotation without any attributes that
 	 * have a default value
 	 * @see #filterAttributes(Predicate)
@@ -433,6 +494,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation with only attributes that match the
 	 * given predicate.
+	 *
+	 * <p>创建仅具有与给定谓词匹配的属性的注解的新视图。
+	 *
 	 * @param predicate a predicate used to filter attribute names
 	 * @return a filtered view of the annotation
 	 * @see #filterDefaultValues()
@@ -445,6 +509,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>Methods from this view will return attribute values with only alias mirroring
 	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
 	 * not be applied.
+	 *
+	 * <p>创建注解的新视图，以显示未合并的属性值。
+	 * <p>此视图中的方法将返回仅应用别名镜像规则的属性值。不会应用元源属性的别名。
+	 *
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
@@ -454,6 +522,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * merged annotation.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values
 	 * are added.
+	 * 
+	 * <p>从此合并注解创建一个新的可变 AnnotationAttributes 实例。
+	 * <p>可以使用调整来改变添加值的方式。
+	 * 
 	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
@@ -462,6 +534,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get an immutable {@link Map} that contains all the annotation attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 *
+	 * <p>获取包含所有注解属性的不可变 Map。
+	 * <p>可以使用调整来改变添加值的方式。
+	 *
 	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
@@ -496,6 +572,17 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <li>The annotation declares attributes that are annotations or arrays of
 	 * annotations that are themselves synthesizable.</li>
 	 * </ul>
+	 * 
+	 * <p>创建此合并注解的类型安全合成版本，可直接在代码中使用。
+	 * <p>结果是使用 JDK 代理合成的，因此首次调用时可能会产生计算成本。
+	 * <p>如果此合并注解是从注解属性或默认属性值的映射创建的，则这些属性将始终合成到注解实例中。
+	 * <p>如果此合并注解是从注解实例创建的，则如果该注解不可合成，则将不加修改地返回该注解。
+	 * 如果注解尚未合成并且以下之一为真，则该注解被视为可合成。
+	 * <ul>
+	 * <li>注解声明使用 @AliasFor 注解的属性。
+	 * <li>注解是一个组合注解，它依赖于元注解中基于约定的注解属性覆盖。
+	 * <li>注解声明本身可合成的注解或注解数组的属性。
+	 * 
 	 * @return a synthesized version of the annotation or the original annotation
 	 * unmodified
 	 * @throws NoSuchElementException on a missing annotation
@@ -509,6 +596,11 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * and as a result may incur a computational cost when first invoked.
 	 * <p>Consult the documentation for {@link #synthesize()} for an explanation
 	 * of what is considered synthesizable.
+	 *
+	 * <p>可选择根据条件谓词创建此注解的类型安全合成版本。
+	 * <p>结果使用 JDK 代理进行合成，因此首次调用时可能会产生计算成本。
+	 * <p>有关可合成内容的说明，请参阅 synthesize() 的文档。
+	 *
 	 * @param condition the test to determine if the annotation can be synthesized
 	 * @return an optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
@@ -521,6 +613,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a {@link MergedAnnotation} that represents a missing annotation
 	 * (i.e. one that is not present).
+	 * 
+	 * <p>创建一个代表缺失注解（即不存在的注解）的 MergedAnnotation。
+	 * 
 	 * @return an instance representing a missing annotation
 	 */
 	static <A extends Annotation> MergedAnnotation<A> missing() {
@@ -530,6 +625,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new {@link MergedAnnotation} instance from the specified
 	 * annotation.
+	 *
+	 * <p>从指定的注解创建一个新的 {@link MergedAnnotation} 实例。
+	 *
 	 * @param annotation the annotation to include
 	 * @return a {@link MergedAnnotation} instance containing the annotation
 	 */
@@ -540,6 +638,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new {@link MergedAnnotation} instance from the specified
 	 * annotation.
+	 *
+	 * <p>从指定的注解创建一个新的 {@link MergedAnnotation} 实例。
+	 *
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations, and it will not be searched.
@@ -554,6 +655,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type. The resulting annotation will not have any attribute
 	 * values but may still be used to query default values.
+	 * 
+	 * <p>创建指定注解类型的新 {@link MergedAnnotation} 实例。生成的注解将不具有任何属性值，但仍可用于查询默认值。
+	 * 
 	 * @param annotationType the annotation type
 	 * @return a {@link MergedAnnotation} instance for the annotation
 	 */
@@ -564,6 +668,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type with attribute values supplied by a map.
+	 * 
+	 * <p>使用 Map 提供的属性值创建指定注解类型的新 {@link MergedAnnotation} 实例。
+	 * 
 	 * @param annotationType the annotation type
 	 * @param attributes the annotation attributes or {@code null} if just default
 	 * values should be used
@@ -579,6 +686,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type with attribute values supplied by a map.
+	 *
+	 * <p>使用 Map 提供的属性值创建指定注解类型的新 {@link MergedAnnotation} 实例。
+	 *
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations and it will not be searched.
@@ -596,6 +706,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type with attribute values supplied by a map.
+	 *
+	 * <p>使用 Map 提供的属性值创建指定注解类型的新 {@link MergedAnnotation} 实例。
+	 *
 	 * @param classLoader the class loader used to resolve class attributes
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
@@ -617,17 +730,24 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Adaptations that can be applied to attribute values when creating
 	 * {@linkplain MergedAnnotation#asMap(Adapt...) Maps} or
 	 * {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes}.
+	 *
+	 * <p>创建 {@linkplain MergedAnnotation#asMap(Adapt...) Maps} 或 {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes} 时可应用于属性值的调整。
+	 *
 	 */
 	enum Adapt {
 
 		/**
 		 * Adapt class or class array attributes to strings.
+		 *
+		 * <p>将类或类数组属性适配为字符串。
 		 */
 		CLASS_TO_STRING,
 
 		/**
 		 * Adapt nested annotation or annotation arrays to maps rather
 		 * than synthesizing the values.
+		 *
+		 * <p>将嵌套注解或注解数组适配到 map ，而不是合成值。
 		 */
 		ANNOTATION_TO_MAP;
 

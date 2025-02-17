@@ -31,6 +31,8 @@ import org.springframework.util.ReflectionUtils;
  * Provides a quick way to access the attribute methods of an {@link Annotation}
  * with consistent ordering as well as a few useful utility methods.
  *
+ * <p>提供一种快速方法来以一致的顺序访问 Annotation 的属性方法以及一些有用的实用方法。按属性名称字母顺序排序
+ *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2
@@ -48,16 +50,20 @@ final class AttributeMethods {
 		return (m1 != null ? -1 : 1);
 	};
 
-
+	// 注解类型
 	@Nullable
 	private final Class<? extends Annotation> annotationType;
 
+	// 注解类型的属性方法
 	private final Method[] attributeMethods;
 
+	// 对应的属性方法的返回值类型是否是Class、Class[] 或 枚举类
 	private final boolean[] canThrowTypeNotPresentException;
 
+	// 是否存在默认值属性方法
 	private final boolean hasDefaultValueMethod;
 
+	// 是否有内嵌的 Annotation ，即是否有属性方法返回类型是 Annotation 或 Annotation[]
 	private final boolean hasNestedAnnotation;
 
 

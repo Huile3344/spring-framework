@@ -62,6 +62,8 @@ public final class BridgeMethodResolver {
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
 	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
+	 * <p>查找提供的桥接方法的本地原始方法。
+	 * <p>传入非桥接方法实例来调用此方法是安全的。在这种情况下，提供的方法实例将直接返回给调用者。调用者在调用此方法之前无需检查桥接。>
 	 * @param bridgeMethod the method to introspect against its declaring class
 	 * @return the original method (either the bridged method or the passed-in method
 	 * if no more specific one could be found)
@@ -100,8 +102,11 @@ public final class BridgeMethodResolver {
 	}
 
 	private static Method resolveBridgeMethod(Method bridgeMethod, Class<?> targetClass) {
+		// 是否指定类中声明的方法
 		boolean localBridge = (targetClass == bridgeMethod.getDeclaringClass());
 		Class<?> userClass = targetClass;
+		// bridgeMethod 不是桥接方法，子类覆写的父类方法在子类中是非桥接方法，但是子类直接使用的父类方法（非覆写的方法）（该被桥接方法在父类，jdk17以前仅有这种类型的是桥接方法），
+		// 以及(jdk17以前不是这样的)子类指定了明确泛型的父类泛型方法（该被桥接方法在子类），而对应形成泛型类型用Object表示的方法（该桥接方法在子类），都是桥接方法
 		if (!bridgeMethod.isBridge() && localBridge) {
 			userClass = ClassUtils.getUserClass(targetClass);
 			if (userClass == targetClass) {
@@ -113,8 +118,11 @@ public final class BridgeMethodResolver {
 		Method bridgedMethod = cache.get(cacheKey);
 		if (bridgedMethod == null) {
 			// Gather all methods with matching name and parameter size.
+			// 收集所有具有匹配名称和参数大小的方法。
 			List<Method> candidateMethods = new ArrayList<>();
+			// 过滤规则：过滤出所有类似 bridgeMethod 方法的非桥接的候选方法
 			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
+			// 按 filter 过滤规则，将 userClass 及其超类、超接口中满足条件的方法，添加到 candidateMethods 中
 			ReflectionUtils.doWithMethods(userClass, candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
 				bridgedMethod = (candidateMethods.size() == 1 ? candidateMethods.get(0) :
@@ -123,6 +131,7 @@ public final class BridgeMethodResolver {
 			if (bridgedMethod == null) {
 				// A bridge method was passed in but we couldn't find the bridged method.
 				// Let's proceed with the passed-in method and hope for the best...
+				// 传入了一个桥接方法，但我们找不到桥接方法。让我们继续处理传入的方法并希望获得最佳结果...
 				bridgedMethod = bridgeMethod;
 			}
 			cache.put(cacheKey, bridgedMethod);
@@ -135,6 +144,8 @@ public final class BridgeMethodResolver {
 	 * considered a valid candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
 	 * checks and can be used to quickly filter for a set of possible matches.
+	 * <p>如果 candidateMethod 可视为提供的桥接方法(bridgeMethod)桥接的方法的有效候选，则返回 true。此方法执行廉价检查，可用于快速筛选一组可能的匹配项。
+	 * <p>判断规则：1、candidateMethod 是非桥接方法。2、candidateMethod 和 bridgeMethod 的名称相同。3、candidateMethod 和 bridgeMethod 的参数个数相同。
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
 		return (!candidateMethod.isBridge() &&
@@ -144,6 +155,7 @@ public final class BridgeMethodResolver {
 
 	/**
 	 * Searches for the bridged method in the given candidates.
+	 * <p>从给定的候选中搜索桥接方法。
 	 * @param candidateMethods the List of candidate Methods
 	 * @param bridgeMethod the bridge method
 	 * @return the bridged method, or {@code null} if none found

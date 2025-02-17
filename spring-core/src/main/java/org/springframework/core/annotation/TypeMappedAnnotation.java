@@ -59,6 +59,22 @@ import org.springframework.util.ClassUtils;
  * <tr><td>Other types</td><td>An exact match or the appropriate primitive wrapper</td></tr>
  * </table>
  *
+ * <p>
+ * <p>MergedAnnotation 通过应用 AnnotationTypeMapping 的映射和镜像规则来调整根注解中的属性。
+ * <p>使用提供的 BiFunction 从源对象中提取根属性值。这允许同一类支持各种不同的注解模型。例如，属性源可能是实际的 Annotation 实例，
+ * 其中调用注解实例上的方法来提取值。同样，源可以是一个简单的 Map，使用 Map.get(Object) 提取值。
+ * <p>提取的根属性值必须与属性返回类型兼容，即：
+ * <p><table border="1">
+ * <tr><th>Return Type</th><th>Extracted Type</th></tr>
+ * <tr><td>Class</td><td>Class or String</td></tr>
+ * <tr><td>Class[]</td><td>Class[] or String[]</td></tr>
+ * <tr><td>Annotation</td><td>Annotation, Map, or Object compatible with the value
+ * extractor</td></tr>
+ * <tr><td>Annotation[]</td><td>Annotation[], Map[], or Object[] where elements are
+ * compatible with the value extractor</td></tr>
+ * <tr><td>Other types</td><td>An exact match or the appropriate primitive wrapper</td></tr>
+ * </table>
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -79,29 +95,39 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		short.class, new short[0],
 		String.class, new String[0]);
 
-
+	// 是 source（source 不为null时）上的注解的层次结构上的一个注解对应的 AnnotationTypeMapping 注解类型映射器对象
 	private final AnnotationTypeMapping mapping;
 
 	@Nullable
 	private final ClassLoader classLoader;
 
+	// 使用根注解的源(AnnotatedElement) ，或 null（仅基于注解类或注解创建时）
 	@Nullable
 	private final Object source;
 
+	// 是一个注解对象或 Map 对象或 null ；若是注解，则是 source 类上的注解(根注解)；若是 Map，则 source 是 null；若是 null ，则不具有任何属性值，但仍可用于查询默认值
 	@Nullable
 	private final Object rootAttributes;
 
+	// lambda表达式实现，
+	// 若 rootAttributes 是注解对象，则是 AnnotationUtils::invokeAnnotationMethod，用于通过反射获取注解的属性值
+	// 若 rootAttributes 是 Map 对象，则是 TypeMappedAnnotation::extractFromMap，用于根据属性名从 Map 中获取值
 	private final ValueExtractor valueExtractor;
 
+	// 聚合索引
 	private final int aggregateIndex;
 
+	// 是否合并值
 	private final boolean useMergedValues;
 
+	// 用于过滤掉不满足条件的属性
 	@Nullable
 	private final Predicate<String> attributeFilter;
 
+	// 已解析的根镜像规则，供根 AnnotationTypeMapping 注解类型映射器使用，镜像规则用于将获取未赋值的别名属性的访问转移到调用有赋值的别名属性
 	private final int[] resolvedRootMirrors;
 
+	// 已解析的镜像规则，针对任意 mapping 映射的镜像规则，镜像规则用于将获取未赋值的别名属性的访问转移到调用有赋值的别名属性
 	private final int[] resolvedMirrors;
 
 
@@ -126,6 +152,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		this.attributeFilter = null;
 		this.resolvedRootMirrors = (resolvedRootMirrors != null ? resolvedRootMirrors :
 				mapping.getRoot().getMirrorSets().resolve(source, rootAttributes, this.valueExtractor));
+		// 使用 rootAttributes 作为属性解析源数据。当 rootAttributes 是注解对象时，一般都是根注解在可注解元素上的实际注解信息。
 		this.resolvedMirrors = (getDistance() == 0 ? this.resolvedRootMirrors :
 				mapping.getMirrorSets().resolve(source, this, this::getValueForMirrorResolution));
 	}
@@ -388,22 +415,35 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (value == null) {
 			value = attribute.getDefaultValue();
 		}
+		// 根据属性方法、值、值类型，调整成需要的返回类型对象
 		return adapt(attribute, value, type);
 	}
 
+	/**
+	 * 获取属性值
+	 *
+	 * @param attributeIndex
+	 * @param useConventionMapping
+	 * @param forMirrorResolution 表示当前获取属性值的时机，是否用于镜像规则解析，true：表示用于镜像规则解析，false：表示镜像规则已解析，并存在了
+	 * @return
+	 */
 	@Nullable
 	private Object getValue(int attributeIndex, boolean useConventionMapping, boolean forMirrorResolution) {
 		AnnotationTypeMapping mapping = this.mapping;
 		if (this.useMergedValues) {
+			// 获取当前映射属性索引位对应的根映射别名属性的索引位
 			int mappedIndex = this.mapping.getAliasMapping(attributeIndex);
+			// 若有别名映射，将不会使用名称约定映射
 			if (mappedIndex == -1 && useConventionMapping) {
 				mappedIndex = this.mapping.getConventionMapping(attributeIndex);
 			}
+			// 根映射中有别名属性时
 			if (mappedIndex != -1) {
 				mapping = mapping.getRoot();
 				attributeIndex = mappedIndex;
 			}
 		}
+		// 通过已有的解析的镜像规则获取属性索引位，而不是重新进行镜像解析处理
 		if (!forMirrorResolution) {
 			attributeIndex =
 					(mapping.getDistance() != 0 ? this.resolvedMirrors : this.resolvedRootMirrors)[attributeIndex];
@@ -411,11 +451,13 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (attributeIndex == -1) {
 			return null;
 		}
+		// mapping 是根映射时，从根映射中获取属性值
 		if (mapping.getDistance() == 0) {
 			Method attribute = mapping.getAttributes().get(attributeIndex);
 			Object result = this.valueExtractor.extract(attribute, this.rootAttributes);
 			return (result != null ? result : attribute.getDefaultValue());
 		}
+		// mapping 不是根映射时，从最近的元注解映射中获取属性值
 		return getValueFromMetaAnnotation(attributeIndex, forMirrorResolution);
 	}
 
@@ -432,10 +474,17 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return value;
 	}
 
+	/**
+	 * 此方法用于解析镜像规则时调用，用于获取属性值，即此时还未生成镜像规则
+	 * @param attribute
+	 * @param annotation
+	 * @return
+	 */
 	@Nullable
 	private Object getValueForMirrorResolution(Method attribute, @Nullable Object annotation) {
 		int attributeIndex = this.mapping.getAttributes().indexOf(attribute);
 		boolean valueAttribute = VALUE.equals(attribute.getName());
+		// 获取注解的属性值，非value属性，可以使用命名约定映射。
 		return getValue(attributeIndex, !valueAttribute, true);
 	}
 
@@ -445,7 +494,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (value == null) {
 			return null;
 		}
+		// 调整并验证属性值，并验证值类型
 		value = adaptForAttribute(attribute, value);
+		// 调整属性值类型
 		type = getAdaptType(attribute, type);
 		if (value instanceof Class<?> clazz && type == String.class) {
 			value = clazz.getName();

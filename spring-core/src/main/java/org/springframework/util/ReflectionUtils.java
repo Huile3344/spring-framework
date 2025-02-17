@@ -347,6 +347,8 @@ public abstract class ReflectionUtils {
 	 * class and superclasses (or given interface and super-interfaces).
 	 * <p>The same named method occurring on subclass and superclass will appear
 	 * twice, unless excluded by the specified {@link MethodFilter}.
+	 * <p>对给定类和超类和超接口中所有匹配方法（mf中的规则进行匹配）执行给定的回调操作（mc中的回调逻辑）。
+	 * <p>子类和超类中出现的同名方法将出现两次，除非被指定的 ReflectionUtils.MethodFilter 排除。
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
@@ -357,6 +359,8 @@ public abstract class ReflectionUtils {
 			// nothing to introspect
 			return;
 		}
+
+		// 获取类上声明的方法和直接实现的接口的默认方法
 		Method[] methods = getDeclaredMethods(clazz, false);
 		for (Method method : methods) {
 			if (mf != null && !mf.matches(method)) {
@@ -369,12 +373,14 @@ public abstract class ReflectionUtils {
 				throw new IllegalStateException("Not allowed to access method '" + method.getName() + "': " + ex);
 			}
 		}
-		// Keep backing up the inheritance hierarchy.
+		// Keep backing up the inheritance hierarchy. 继续递归继承层次结构
 		if (clazz.getSuperclass() != null && (mf != USER_DECLARED_METHODS || clazz.getSuperclass() != Object.class)) {
+			// 递归超类
 			doWithMethods(clazz.getSuperclass(), mc, mf);
 		}
 		else if (clazz.isInterface()) {
 			for (Class<?> superIfc : clazz.getInterfaces()) {
+				// 递归接口
 				doWithMethods(superIfc, mc, mf);
 			}
 		}
@@ -447,6 +453,8 @@ public abstract class ReflectionUtils {
 	 * order to avoid new Method instances. In addition, it also includes Java 8
 	 * default methods from locally implemented interfaces, since those are
 	 * effectively to be treated just like declared methods.
+	 * <p>Class.getDeclaredMethods() 的变体，使用本地缓存来避免产生新的 Method 实例。
+	 * 此外，它还包括来自本地实现接口的 Java 8 默认方法，因为这些方法实际上可以像声明的方法一样被处理。
 	 * @param clazz the class to introspect
 	 * @return the cached array of methods
 	 * @throws IllegalStateException if introspection fails
@@ -457,12 +465,16 @@ public abstract class ReflectionUtils {
 		return getDeclaredMethods(clazz, true);
 	}
 
+	/**
+	 * 获取类上声明的方法和直接实现的接口的默认方法
+ 	 */
 	private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
 		Assert.notNull(clazz, "Class must not be null");
 		Method[] result = declaredMethodsCache.get(clazz);
 		if (result == null) {
 			try {
 				Method[] declaredMethods = clazz.getDeclaredMethods();
+				// 获取类直接实现的接口的默认方法
 				List<Method> defaultMethods = findDefaultMethodsOnInterfaces(clazz);
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];

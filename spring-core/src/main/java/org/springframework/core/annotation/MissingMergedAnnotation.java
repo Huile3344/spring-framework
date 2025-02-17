@@ -31,6 +31,8 @@ import org.springframework.lang.Nullable;
  * An {@link AbstractMergedAnnotation} used as the implementation of
  * {@link MergedAnnotation#missing()}.
  *
+ * <p>用作 {@link MergedAnnotation#missing()} 的实现的 {@link AbstractMergedAnnotation}。
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @since 5.2

@@ -36,6 +36,9 @@ import org.springframework.util.StringUtils;
  * code as well as convenience methods for looking up annotation attributes
  * in a type-safe fashion.
  *
+ * <p>LinkedHashMap 的子类表示注解属性键值对，由 AnnotationUtils、AnnotatedElementUtils 和 Spring 的基于反射和 ASM 的 AnnotationMetadata 实现读取。
+ * <p>提供“伪具体化（pseudo-reification）”以避免调用代码中的噪音 Map 泛型，以及以类型安全的方式查找注解属性的便捷方法。
+ *
  * @author Chris Beams
  * @author Sam Brannen
  * @author Juergen Hoeller

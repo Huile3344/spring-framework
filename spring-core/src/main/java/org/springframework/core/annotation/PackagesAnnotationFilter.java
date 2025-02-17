@@ -25,7 +25,8 @@ import org.springframework.util.StringUtils;
 /**
  * {@link AnnotationFilter} implementation used for
  * {@link AnnotationFilter#packages(String...)}.
- *
+ * <p>用于 AnnotationFilter.packages(String...) 的 AnnotationFilter 实现。
+ * <p>只匹配特定包前缀的注解类型
  * @author Phillip Webb
  * @since 5.2
  */

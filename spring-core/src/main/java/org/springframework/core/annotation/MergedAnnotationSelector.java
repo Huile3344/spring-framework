@@ -21,7 +21,7 @@ import java.lang.annotation.Annotation;
 /**
  * Strategy interface used to select between two {@link MergedAnnotation}
  * instances.
- *
+ * <p>用于在两个 MergedAnnotation 实例之间进行选择的策略接口
  * @author Phillip Webb
  * @since 5.2
  * @param <A> the annotation type
@@ -33,6 +33,8 @@ public interface MergedAnnotationSelector<A extends Annotation> {
 	/**
 	 * Determine if the existing annotation is known to be the best
 	 * candidate and any subsequent selections may be skipped.
+	 * <p>确定传入的 MergedAnnotation 是否是最佳候选者；若是，则取当前的 MergedAnnotation 作为最优解，跳过任何后续筛选；
+	 * 否则将继续从 MergedAnnotations 中筛选其他 MergedAnnotation ，并通过 {@link #select} 方法俩俩对比出最优解。
 	 * @param annotation the annotation to check
 	 * @return {@code true} if the annotation is known to be the best candidate
 	 */
@@ -42,6 +44,8 @@ public interface MergedAnnotationSelector<A extends Annotation> {
 
 	/**
 	 * Select the annotation that should be used.
+	 * <p>从已存在的 MergedAnnotation 和候选的 MergedAnnotation 中选择要使用的最优解 MergedAnnotation
+	 *
 	 * @param existing an existing annotation returned from an earlier result
 	 * @param candidate a candidate annotation that may be better suited
 	 * @return the most appropriate annotation from the {@code existing} or

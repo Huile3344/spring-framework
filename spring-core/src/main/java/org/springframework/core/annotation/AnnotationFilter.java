@@ -26,6 +26,10 @@ import java.lang.annotation.Annotation;
  * filter (for efficiency reasons). Any additional filters and even custom filter
  * implementations apply within this boundary and may only narrow further from here.
  *
+ * <p>回调接口可用于过滤特定注解类型。
+ * <p>请注意，MergedAnnotations 模型（此接口的设计目的）始终会根据 PLAIN 过滤器忽略注解（出于效率原因）。
+ * 任何其他过滤器甚至自定义过滤器实现都适用于此边界，并且可能只会从此处进一步缩小。
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @since 5.2
@@ -39,18 +43,23 @@ public interface AnnotationFilter {
 	 * {@code java.lang} and {@code org.springframework.lang} packages
 	 * and their subpackages.
 	 * <p>This is the default filter in the {@link MergedAnnotations} model.
+	 *
+	 * <p>与 java.lang 和 org.springframework.lang 包及其子包中的注解匹配的 AnnotationFilter。
+	 * 这是 MergedAnnotations 模型中的默认过滤器。
 	 */
 	AnnotationFilter PLAIN = packages("java.lang", "org.springframework.lang");
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
 	 * {@code java} and {@code javax} packages and their subpackages.
+	 * <p>与 java 和 javax 包及其子包中的注解匹配的 AnnotationFilter
 	 */
 	AnnotationFilter JAVA = packages("java", "javax");
 
 	/**
 	 * {@link AnnotationFilter} that always matches and can be used when no
 	 * relevant annotation types are expected to be present at all.
+	 * <p>始终匹配的AnnotationFilter，并且可以在根本不存在相关注解类型时使用
 	 */
 	AnnotationFilter ALL = new AnnotationFilter() {
 		@Override
@@ -74,6 +83,8 @@ public interface AnnotationFilter {
 	/**
 	 * {@link AnnotationFilter} that never matches and can be used when no
 	 * filtering is needed (allowing for any annotation types to be present).
+	 * <p>永远不会匹配的 AnnotationFilter，可以在不需要过滤时使用（允许存在任何注解类型）。
+	 * 自 5.2.6 起已弃用
 	 * @see #PLAIN
 	 * @deprecated as of 5.2.6 since the {@link MergedAnnotations} model
 	 * always ignores lang annotations according to the {@link #PLAIN} filter

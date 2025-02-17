@@ -41,6 +41,10 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * <p>This class is designed to be cached so that meta-annotations only need to
  * be searched once, regardless of how many times they are actually used.
  *
+ * <p>为单个源注解类型提供 AnnotationTypeMapping 信息。对所有元注解执行递归广度优先爬取，最终提供一种快速映射根注解属性的方法。
+ * <p>支持基于约定的元注解合并以及隐式和显式 @AliasFor 别名。还提供有关镜像属性的信息。
+ * <p>此类设计为缓存，因此只需搜索一次元注解，无论实际使用多少次。
+ *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2
@@ -50,15 +54,19 @@ final class AnnotationTypeMappings {
 
 	private static final IntrospectionFailureLogger failureLogger = IntrospectionFailureLogger.DEBUG;
 
+	// 基于Java 标准 @Repeatable 的可重复注解容器，key为 AnnotationFilter 的缓存
 	private static final Map<AnnotationFilter, Cache> standardRepeatablesCache = new ConcurrentReferenceHashMap<>();
 
+	// 基于不可重复注解容器，key 为 AnnotationFilter 的缓存
 	private static final Map<AnnotationFilter, Cache> noRepeatablesCache = new ConcurrentReferenceHashMap<>();
 
-
+	// 使用的可重复注解容器
 	private final RepeatableContainers repeatableContainers;
 
+	// 注解过滤器， 满足此过滤条件的注解信息将不会转换成 AnnotationTypeMapping，也不会存储到 mappings 中
 	private final AnnotationFilter filter;
 
+	// 存储此源注解的所有注解及其递归层级结构的所有元注解信息。每一个注解类型对应一个AnnotationTypeMapping 实例
 	private final List<AnnotationTypeMapping> mappings;
 
 
@@ -74,39 +82,61 @@ final class AnnotationTypeMappings {
 	}
 
 
+	/**
+	 * 从根注解的注解类型解析出所有关联 AnnotationTypeMapping 的递归入口方法，针对每个注解类型生成一个 AnnotationTypeMapping 并放入队列中，
+	 * 再从队列中取出注解，解析注解的元注解，然后为每个元注解的注解类型生成一个 AnnotationTypeMapping 并放入队列中，再解析其元注解，依次递归
+	 *
+	 * @param annotationType 根注解类型
+	 * @param visitedAnnotationTypes
+	 */
 	private void addAllMappings(Class<? extends Annotation> annotationType,
 			Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 		Deque<AnnotationTypeMapping> queue = new ArrayDeque<>();
+		// 为注解 annotationType 生成一个根 AnnotationTypeMapping 对象，并放入队列 queue 中
 		addIfPossible(queue, null, annotationType, null, visitedAnnotationTypes);
+		// 从队列 queue 中取出 AnnotationTypeMapping 对象，并添加到 mappings 中
 		while (!queue.isEmpty()) {
 			AnnotationTypeMapping mapping = queue.removeFirst();
 			this.mappings.add(mapping);
+			// 为 AnnotationTypeMapping 对象的注解类型的元注解生成 AnnotationTypeMapping 对象，并放入队列 queue 中
 			addMetaAnnotationsToQueue(queue, mapping);
 		}
 	}
 
+	/**
+	 * 将 AnnotationTypeMapping 类型的 source 对象的注解类型的元注解生成 AnnotationTypeMapping 对象，并放入队列 queue 中
+	 * @param queue
+	 * @param source
+	 */
 	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source) {
+		// 返回此注解Class的直接存在的注解数组，忽略继承的注解
 		Annotation[] metaAnnotations = AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
+			// 如果 metaAnnotation 不符合 filter 的过滤条件，或者不是"java.lang"包和"org.springframework.lang"包中的注解类、
+			// 或者已经被映射处理过的注解类（内部会递归其 source），则跳过
 			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
+			// 如果 metaAnnotation 是可重复容器注解，则获取 metaAnnotation 的所有可重复注解
 			Annotation[] repeatedAnnotations = this.repeatableContainers.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
 					if (!isMappable(source, repeatedAnnotation)) {
 						continue;
 					}
+					// 将可重复注解 repeatedAnnotation 逐一转换成 AnnotationTypeMapping 添加到队列 queue 中
 					addIfPossible(queue, source, repeatedAnnotation);
 				}
 			}
 			else {
+				// 如果 metaAnnotation 不是可重复注解，则直接转换成 AnnotationTypeMapping 添加到队列 queue 中
 				addIfPossible(queue, source, metaAnnotation);
 			}
 		}
 	}
 
 	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source, Annotation ann) {
+		// 此时 visitedAnnotationTypes 是一个新的 Set 集合，表明每一个元注解共用一个 Set 集合
 		addIfPossible(queue, source, ann.annotationType(), ann, new HashSet<>());
 	}
 
@@ -115,6 +145,7 @@ final class AnnotationTypeMappings {
 			Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 
 		try {
+			// 基于注解 ann 和 AnnotationTypeMapping 的 source ，创建注解的Class对象的 annotationType 对应的 AnnotationTypeMapping
 			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann, visitedAnnotationTypes));
 		}
 		catch (Exception ex) {
@@ -241,6 +272,7 @@ final class AnnotationTypeMappings {
 
 	/**
 	 * Cache created per {@link AnnotationFilter}.
+	 * <p>为每个 AnnotationFilter 创建的缓存
 	 */
 	private static class Cache {
 

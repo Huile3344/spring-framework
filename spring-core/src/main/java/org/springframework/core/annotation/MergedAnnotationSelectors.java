@@ -22,6 +22,8 @@ import java.util.function.Predicate;
 /**
  * {@link MergedAnnotationSelector} implementations that provide various options
  * for {@link MergedAnnotation} instances.
+ * <p>为 MergedAnnotation 实例提供各种选项的 MergedAnnotationSelector 实现。
+ * 仅有两个用于提供两种 MergedAnnotationSelector 单例的静态工厂方法，分别获取： Nearest 和 FirstDirectlyDeclared 单例
  *
  * @author Phillip Webb
  * @since 5.2
@@ -61,6 +63,7 @@ public abstract class MergedAnnotationSelectors {
 
 	/**
 	 * {@link MergedAnnotationSelector} to select the nearest annotation.
+	 * <p>选择距离根注解最近的注解的 MergedAnnotationSelector，距离相同时，取第一个。
 	 */
 	private static class Nearest implements MergedAnnotationSelector<Annotation> {
 
@@ -85,6 +88,7 @@ public abstract class MergedAnnotationSelectors {
 	/**
 	 * {@link MergedAnnotationSelector} to select the first directly declared
 	 * annotation.
+	 * <p>选择第一个直接声明的注解的 MergedAnnotationSelector。
 	 */
 	private static class FirstDirectlyDeclared implements MergedAnnotationSelector<Annotation> {
 

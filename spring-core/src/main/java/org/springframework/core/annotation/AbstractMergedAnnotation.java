@@ -27,6 +27,8 @@ import org.springframework.util.Assert;
 /**
  * Abstract base class for {@link MergedAnnotation} implementations.
  *
+ * <p>MergedAnnotation 实现的抽象基类。
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @since 5.2
@@ -222,6 +224,8 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 
 	/**
 	 * Get the underlying attribute value.
+	 *
+	 * <p>获取底层属性值。
 	 * @param attributeName the attribute name
 	 * @param type the type to return (see {@link MergedAnnotation} class
 	 * documentation for details)
@@ -239,6 +243,10 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	 * will be returned unmodified.
 	 * <p>Consult the documentation for {@link MergedAnnotation#synthesize()}
 	 * for an explanation of what is considered synthesizable.
+	 *
+	 * <p>用于创建合成注解的工厂方法。
+	 * <p>如果源是不可合成的注解，则将不加修改地返回。
+	 * <p>有关可合成注解的说明，请参阅 MergedAnnotation.synthesize() 文档。
 	 */
 	protected abstract A createSynthesizedAnnotation();
 
