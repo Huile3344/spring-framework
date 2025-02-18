@@ -31,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * {@link MethodMetadata} implementation that uses standard reflection
  * to introspect a given {@code Method}.
+ * <p>MethodMetadata 实现使用标准反射来自省给定的方法。
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
@@ -45,6 +46,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	private final boolean nestedAnnotationsAsMap;
 
+	// TypeMappedAnnotations 类型的实例
 	private final MergedAnnotations mergedAnnotations;
 
 

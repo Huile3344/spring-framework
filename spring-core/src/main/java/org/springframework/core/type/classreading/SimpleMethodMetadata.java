@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link MethodMetadata} created from a {@link SimpleMethodMetadataReadingVisitor}.
+ * <p>从 SimpleMethodMetadataReadingVisitor 创建的 MethodMetadata。
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -41,6 +42,7 @@ final class SimpleMethodMetadata implements MethodMetadata {
 	// The source implements equals(), hashCode(), and toString() for the underlying method.
 	private final Object source;
 
+	// MergedAnnotationsCollection 类型的实例
 	private final MergedAnnotations annotations;
 
 

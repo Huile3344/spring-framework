@@ -40,6 +40,7 @@ import org.springframework.util.MultiValueMap;
  * or {@link MethodMetadata method}), in a form that does not necessarily require
  * class loading of the types being inspected. Note, however, that classes for
  * encountered annotations will be loaded.
+ * <p>定义对特定类型（类或方法）注解的访问，其形式不一定需要加载所检查类型的类。但请注意，遇到的注解的类将被加载。
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -56,6 +57,7 @@ public interface AnnotatedTypeMetadata {
 	/**
 	 * Get annotation details based on the direct annotations and meta-annotations
 	 * of the underlying element.
+	 * <p>根据底层元素的直接注解和元注解获取注解详情。
 	 * @return merged annotations based on the direct annotations and meta-annotations
 	 * @since 5.2
 	 */
@@ -66,6 +68,8 @@ public interface AnnotatedTypeMetadata {
 	 * of the given type defined.
 	 * <p>If this method returns {@code true}, then
 	 * {@link #getAnnotationAttributes} will return a non-null Map.
+	 * <p>确定底层元素是否定义了给定类型的注解或元注解。
+	 * <p>如果此方法返回 true，则 getAnnotationAttributes 将返回非空 Map。
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return whether a matching annotation is defined
@@ -80,6 +84,8 @@ public interface AnnotatedTypeMetadata {
 	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
 	 * are fully supported, both within a single annotation and within annotation
 	 * hierarchies.
+	 * <p>检索给定类型的注解的属性（如果有）（即，如果在底层元素上定义为直接注解或元注解）。
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} 语义完全受支持，无论是在单个注解中还是在注解层次结构中。
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return a {@link Map} of attributes, with each annotation attribute name
@@ -97,6 +103,8 @@ public interface AnnotatedTypeMetadata {
 	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
 	 * are fully supported, both within a single annotation and within annotation
 	 * hierarchies.
+	 * <p>检索给定类型的注解的属性（如果有）（即，如果在底层元素上定义为直接注解或元注解）。
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} 语义完全受支持，无论是在单个注解中还是在注解层次结构中。
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @param classValuesAsString whether to convert class references to String
@@ -123,6 +131,8 @@ public interface AnnotatedTypeMetadata {
 	 * defined on the underlying element, as direct annotation or meta-annotation).
 	 * <p>Note: this method does <i>not</i> take attribute overrides on composed
 	 * annotations into account.
+	 * <p>检索给定类型的所有注解的所有属性（如果有）（即，如果在底层元素上定义为直接注解或元注解）。
+	 * <p>注意：此方法不考虑组合注解上的属性覆盖。
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return a {@link MultiValueMap} of attributes, with each annotation attribute
@@ -140,6 +150,8 @@ public interface AnnotatedTypeMetadata {
 	 * defined on the underlying element, as direct annotation or meta-annotation).
 	 * <p>Note: this method does <i>not</i> take attribute overrides on composed
 	 * annotations into account.
+	 * <p>检索给定类型的所有注解的所有属性（如果有）（即，如果在底层元素上定义为直接注解或元注解）。
+	 * <p>注意：此方法不考虑组合注解上的属性覆盖。
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @param classValuesAsString whether to convert class references to String
@@ -172,6 +184,10 @@ public interface AnnotatedTypeMetadata {
 	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
 	 * are fully supported, both within a single annotation and within annotation
 	 * hierarchies.
+	 * <p>检索底层元素上方注解层次结构中给定类型的所有可重复注解（作为直接注解或元注解）；对于找到的每个注解，
+	 * 将该注解的属性与注解层次结构较低级别的注解中的匹配属性合并，并将结果存储在 AnnotationAttributes 的实例中。
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} 语义完全受支持，
+	 * 无论是在单个注解中还是在注解层次结构中。
 	 * @param annotationType the annotation type to find
 	 * @param containerType the type of the container that holds the annotations
 	 * @param classValuesAsString whether to convert class references to {@code String}
@@ -206,6 +222,12 @@ public interface AnnotatedTypeMetadata {
 	 * based on each annotation's {@linkplain MergedAnnotation#getDistance()
 	 * meta distance}, which effectively orders meta-annotations before annotations
 	 * that are declared directly on the underlying element.
+	 * <p>检索底层元素上方注解层次结构中给定类型的所有可重复注解（作为直接注解或元注解）；对于找到的每个注解，
+	 * 将该注解的属性与注解层次结构较低级别的注解中的匹配属性合并，并将结果存储在 AnnotationAttributes 的实例中。
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} 语义完全受支持，无论是在
+	 * 单个注解中还是在注解层次结构中。
+	 * <p>如果 sortByReversedMetaDistance 标志设置为 true，则结果将根据每个注解的元距离按相反顺序排序，
+	 * 这实际上将元注解排在直接在底层元素上声明的注解之前。
 	 * @param annotationType the annotation type to find
 	 * @param containerType the type of the container that holds the annotations
 	 * @param classValuesAsString whether to convert class references to {@code String}
@@ -247,6 +269,15 @@ public interface AnnotatedTypeMetadata {
 	 * based on each annotation's {@linkplain MergedAnnotation#getDistance()
 	 * meta distance}, which effectively orders meta-annotations before annotations
 	 * that are declared directly on the underlying element.
+	 * <p>在底层元素上方的注解层次结构中检索给定类型的所有可重复注解（作为直接注解或元注解）；
+	 * 对于找到的每个注解，将该注解的属性与注解层次结构较低级别的注解中的匹配属性合并，
+	 * 并将结果存储在 AnnotationAttributes 的实例中。
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} 语义完全受支持，
+	 * 无论是在单个注解中还是在注解层次结构中。
+	 * <p>提供的谓词将用于过滤结果。例如，提供 mergedAnnotation -> true 以在结果中包含所有注解；
+	 * 提供 MergedAnnotation::isDirectlyPresent 以将结果限制为直接声明的注解等。
+	 * <p>如果 sortByReversedMetaDistance 标志设置为 true，则结果将根据每个注解的元距离按相反顺序排序，
+	 * 这实际上将元注解排在直接在底层元素上声明的注解之前。
 	 * @param annotationType the annotation type to find
 	 * @param containerType the type of the container that holds the annotations
 	 * @param predicate a {@code Predicate} to apply to each {@code MergedAnnotation}

@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@link AnnotationMetadata} created from a
  * {@link SimpleAnnotationMetadataReadingVisitor}.
+ * <p>从 SimpleAnnotationMetadataReadingVisitor 创建的 AnnotationMetadata。
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -56,6 +57,7 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	private final Set<MethodMetadata> declaredMethods;
 
+	// MergedAnnotationsCollection 类型的实例
 	private final MergedAnnotations mergedAnnotations;
 
 	@Nullable

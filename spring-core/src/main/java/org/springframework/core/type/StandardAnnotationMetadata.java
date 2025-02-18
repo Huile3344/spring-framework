@@ -36,6 +36,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * {@link AnnotationMetadata} implementation that uses standard reflection
  * to introspect a given {@link Class}.
+ * <p>使用标准反射来反省给定的类的AnnotationMetadata 实现。
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -46,6 +47,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
 
+	// TypeMappedAnnotations 类型的实例
 	private final MergedAnnotations mergedAnnotations;
 
 	private final boolean nestedAnnotationsAsMap;
