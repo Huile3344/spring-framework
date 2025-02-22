@@ -41,6 +41,10 @@ import org.springframework.util.StringUtils;
  * and a {@link ClassPathResource} if it is a non-URL path or a
  * "classpath:" pseudo-URL.
  *
+ * <p>ResourceLoader 接口的默认实现。
+ * <p>由 ResourceEditor 使用，并作为 AbstractApplicationContext 的基类。也可以单独使用。
+ * <p>如果位置（location）值是 URL，则返回 UrlResource 如果是非 URL 路径或“classpath:”伪 URL，则返回 ClassPathResource 。
+ *
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see FileSystemResourceLoader
@@ -51,8 +55,10 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Nullable
 	private ClassLoader classLoader;
 
+	// 协议解析器，用于解析自定义协议的 URL，一般都是空的
 	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
 
+	// 缓存各种已获取的 Resource，缓存场景如： MetadataReader 通过 DefaultResourceLoader 获取的指定 Resource 对应的 MetadataReader 对象
 	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
 
 
@@ -61,6 +67,9 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>ClassLoader access will happen using the thread context class loader
 	 * at the time of actual resource access (since 5.3). For more control, pass
 	 * a specific ClassLoader to {@link #DefaultResourceLoader(ClassLoader)}.
+	 * <p>创建一个新的 DefaultResourceLoader。
+	 * <p>ClassLoader 访问将在实际资源访问时使用线程上下文类加载器进行（自 5.3 起）。
+	 * 如需更多控制，请将特定的 ClassLoader 传递给 DefaultResourceLoader(ClassLoader)。
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
@@ -123,6 +132,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	/**
 	 * Obtain a cache for the given value type, keyed by {@link Resource}.
+	 * <p>获取给定值类型的缓存，以资源为键。
 	 * @param valueType the value type, for example, an ASM {@code MetadataReader}
 	 * @return the cache {@link Map}, shared at the {@code ResourceLoader} level
 	 * @since 5.0
@@ -177,6 +187,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default implementation supports class path locations. This should
 	 * be appropriate for standalone implementations but can be overridden,
 	 * for example, for implementations targeted at a Servlet container.
+	 * <p>返回给定路径上的资源的资源句柄。
+	 * <p>默认实现支持类路径位置。这应该适用于独立实现，但可以被覆盖，例如，针对 Servlet 容器的实现。
 	 * @param path the path to the resource
 	 * @return the corresponding Resource handle
 	 * @see ClassPathResource

@@ -47,6 +47,16 @@ import org.springframework.core.io.ResourceLoader;
  * {@code "/beans-*.xml"}. JAR files or different directories in the module path
  * or class path can contain multiple files of the same name.
  *
+ * <p>用于解析资源位置模式（例如， Ant 风格的路径模式）转换为 Resource 对象的策略接口。
+ * <p>这是对 ResourceLoader 接口的扩展。可以检查传入的 ResourceLoader（例如，在上下文中
+ * 运行时通过 ResourceLoaderAware 传入的 ApplicationContext）是否也实现了此扩展接口。
+ * <p>PathMatchingResourcePatternResolver 是一个独立的实现，可以在 ApplicationContext 之外使用，
+ * 也可以由用于填充Resource数组 bean 的ResourceArrayPropertyEditor 特性。
+ * <p>可与任何类型的位置模式一起使用 - 例如， "/WEB-INF/*-context.xml" 。然而，输入模式必须匹配策略实现。
+ * 该接口只是指定了转换方法而不是特定的模式格式。
+ * <p>该接口还定义了“classpath*:”资源前缀，用于所有匹配资源的模块路径和类路径。注意：资源位置还可能包含占位符
+ * - 例如 "/beans-*.xml" 。 JAR 文件或模块路径或类路径中的不同目录可以包含多个同名文件。
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.0.2
@@ -55,7 +65,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
  */
-public interface ResourcePatternResolver extends ResourceLoader {
+	public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
 	 * Pseudo URL prefix for all matching resources from the class path: {@code "classpath*:"}.
@@ -65,6 +75,10 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * files you can use the location pattern {@code "classpath*:/beans.xml"}.
 	 * <p>As of Spring Framework 6.0, the semantics for the {@code "classpath*:"}
 	 * prefix have been expanded to include the module path as well as the class path.
+	 * <p>来自类路径的所有匹配资源的伪 URL 前缀：“classpath*:”。
+	 * <p>这与 ResourceLoader 的“classpath:” URL 前缀不同，因为它检索给定路径的所有匹配资源
+	 * — 例如，要在所有部署的 JAR 文件的根目录中找到所有“beans.xml”文件，您可以使用位置模式“classpath*:/beans.xml”。
+	 * <p>从 Spring Framework 6.0 开始，“classpath*:”前缀的语义已扩展为包括模块路径和类路径。
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
 	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
@@ -74,6 +88,10 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * <p>Overlapping resource entries that point to the same physical
 	 * resource should be avoided, as far as possible. The result should
 	 * have set semantics.
+	 *
+	 * <p>将给定的资源位置模式解析为 Resource 对象数组。
+	 * <p>应尽可能避免指向同一物理资源的重叠资源条目。结果应具有设置语义。
+	 *
 	 * @param locationPattern the location pattern to resolve
 	 * @return the corresponding {@code Resource} objects
 	 * @throws IOException in case of I/O errors

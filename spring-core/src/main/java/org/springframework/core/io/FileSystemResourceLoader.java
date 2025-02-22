@@ -30,6 +30,10 @@ package org.springframework.core.io;
  * is a full-fledged ApplicationContext implementation that provides
  * the same resource path resolution strategy.
  *
+ * <p>ResourceLoader 实现将纯路径解析为文件系统资源，而不是类路径资源（后者是 DefaultResourceLoader 的默认策略）。
+ * <p>注意：纯路径将始终被解释为相对于当前 VM 工作目录，即使它们以斜杠开头也是如此。（这与 Servlet 容器中的语义一致。）使用显式“file:”前缀来强制执行绝对文件路径。
+ * <p> FileSystemXmlApplicationContext 是一个成熟的 ApplicationContext 实现，它提供相同的资源路径解析策略。
+ *
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see DefaultResourceLoader

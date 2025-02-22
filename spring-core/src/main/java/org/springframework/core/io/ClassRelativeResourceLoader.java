@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@link ResourceLoader} implementation that interprets plain resource paths
  * as relative to a given {@code java.lang.Class}.
+ * <p>将普通资源路径解释为相对于给定的java.lang.Class的 ResourceLoader 实现 。
  *
  * @author Juergen Hoeller
  * @since 3.0

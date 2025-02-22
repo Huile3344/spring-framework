@@ -38,6 +38,11 @@ import org.springframework.util.StringUtils;
  * <p>Delegates to a {@link ResourceLoader} to do the heavy lifting,
  * by default using a {@link DefaultResourceLoader}.
  *
+ * <p>Resource 描述符的 Editor ，自动转换String位置 例如， file:C:/myfile.txt或classpath:myfile.txt
+ * 到 Resource属性而不是使用String位置属性。
+ * <p>路径可能包含${...}占位符，将解析为 Environment 属性：例如${user.dir} 。默认情况下，无法解析的占位符将被忽略。
+ * <p>委托给 ResourceLoader 来完成繁重的工作，默认情况下使用 DefaultResourceLoader 。
+ *
  * @author Juergen Hoeller
  * @author Dave Syer
  * @author Chris Beams

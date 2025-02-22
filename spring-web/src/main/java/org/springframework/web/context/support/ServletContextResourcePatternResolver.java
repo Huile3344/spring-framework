@@ -39,6 +39,8 @@ import org.springframework.util.StringUtils;
  * able to find matching resources below the web application root directory
  * via {@link ServletContext#getResourcePaths}. Falls back to the superclass'
  * file system checking for other resources.
+ * <p>PathMatchingResourcePatternResolver 的 ServletContext 感知子类，能够通过
+ * ServletContext.getResourcePaths 在 Web 应用程序根目录下找到匹配的资源。对于其他资源，将返回超类的文件系统检查。
  *
  * @author Juergen Hoeller
  * @since 1.1.2
