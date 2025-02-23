@@ -23,7 +23,31 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Specialization of {@link MapPropertySource} designed for use with
+ * 设计用于系统环境变量的专业化的 MapPropertySource 。 补偿 Bash 和其他 shell 中不允许变量的约束，
+ * 包含句点字符和/或连字符；也允许大 属性名称的变体，以便更惯用的 shell 使用。
+ *
+ * <p>例如，调用getProperty("foo.bar")将尝试查找一个值，对于原始属性或任何“等效”属性，返回第一个找到的：
+ * <ul>
+ * <li>foo.bar - 原始名称
+ * <li>foo_bar - 用下划线表示句点（如果有）
+ * <li>FOO.BAR - 原始，大写
+ * <li>FOO_BAR - 带下划线和大写字母</li>
+* </ul>
+ * 上述任何连字符变体都可以工作，甚至可以混合点/连字符变体。
+ *
+ * <p>这同样适用于调用containsProperty(String) ，如果存在上述任何属性，它返回则为true ，否则为false 。
+ *
+ * <p>当将活动或默认 profiles 指定为环境变量。 Bash 下不允许以下行为：
+ * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
+ *
+ * 但是，以下语法是允许的，并且也是更常规的：
+ * <pre class="code">SPRING_PROFILES_ACTIVE=p1 java -classpath ... MyApp</pre>
+ *
+ * <p>为此类（或包）启用消息的调试或跟踪级别日志记录，解释这些“属性名称解析”何时发生。
+ *
+ * <p>默认情况下，此属性源包含在 StandardEnvironment 及其所有子类中。
+ *
+ * <p>Specialization of {@link MapPropertySource} designed for use with
  * {@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}.
  * Compensates for constraints in Bash and other shells that do not allow for variables
  * containing the period character and/or hyphen character; also allows for uppercase

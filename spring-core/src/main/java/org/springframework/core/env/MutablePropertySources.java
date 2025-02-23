@@ -33,6 +33,9 @@ import org.springframework.lang.Nullable;
  * and {@link #addLast}, this is with regard to the order in which property sources
  * will be searched when resolving a given property with a {@link PropertyResolver}.
  *
+ * <p>PropertySources 接口的默认实现。允许操作所包含的 PropertySource，并提供用于复制现有 PropertySources 实例的构造函数。
+ * <p>在 addFirst 和 addLast 等方法中提到优先级时，这是指在使用 PropertyResolver 解析给定属性时搜索属性源的顺序。
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
@@ -121,6 +124,7 @@ public class MutablePropertySources implements PropertySources {
 	/**
 	 * Add the given property source object with precedence immediately higher
 	 * than the named relative property source.
+	 * <p>添加给定的 PropertySource 对象，其优先级立即高于命名的相对属性源。
 	 */
 	public void addBefore(String relativePropertySourceName, PropertySource<?> propertySource) {
 		assertLegalRelativeAddition(relativePropertySourceName, propertySource);
@@ -146,6 +150,7 @@ public class MutablePropertySources implements PropertySources {
 
 	/**
 	 * Return the precedence of the given property source, {@code -1} if not found.
+	 * <p>返回给定 PropertySource 的优先级，如果未找到则返回 -1。
 	 */
 	public int precedenceOf(PropertySource<?> propertySource) {
 		return this.propertySourceList.indexOf(propertySource);

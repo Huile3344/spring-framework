@@ -22,7 +22,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link PropertySource} that reads keys and values from a {@code Map} object.
+ * 从Map对象读取键和值的 PropertySource。底层映射不应包含任何null值，以符合
+ * getProperty(java.lang.String) 和 containsProperty(java.lang.String) 语义。
+ * <p>{@link PropertySource} that reads keys and values from a {@code Map} object.
  * The underlying map should not contain any {@code null} values in order to
  * comply with {@link #getProperty} and {@link #containsProperty} semantics.
  *

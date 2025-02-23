@@ -23,7 +23,133 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract base class for {@link PropertySource} implementations backed by command line
+ * 由命令行参数支持的 PropertySource 实现的抽象基类。参数化类型T表示命令的底层源命令行选项。
+ * 例如，SimpleCommandLinePropertySource 使用字符串数组。
+ *
+ * <h3>目的和一般用途/h3>
+ * 用于基于Spring的独立的应用程序，即通过传统的main方法从命令行接受String[]参数引导的应用程序。在许多情况下，
+ * 直接在main方法中处理命令行参数可能就足够了，但在其他情况下，可能需要将参数作为值注入Spring bean。在后一种情况下，
+ * CommandLinePropertySource 变得有用。CommandLinePropertySource 通常会添加到Spring ApplicationContext的环境中，
+ * 此时所有命令行参数都可以通过PropertyResolver.getProperty(String) 系列方法获得。例如：
+ * <pre class="code">
+ * public static void main(String[] args) {
+ *     CommandLinePropertySource clps = ...;
+ *     AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+ *     ctx.getEnvironment().getPropertySources().addFirst(clps);
+ *     ctx.register(AppConfig.class);
+ *     ctx.refresh();
+ * }</pre>
+ *
+ * 使用上述引导逻辑，AppConfig类可以@Inject Spring Environment 并直接查询其属性：
+ * <pre class="code">
+ * &#064;Configuration
+ * public class AppConfig {
+ *
+ *     &#064;Inject Environment env;
+ *
+ *     &#064;Bean
+ *     public void DataSource dataSource() {
+ *         MyVendorDataSource dataSource = new MyVendorDataSource();
+ *         dataSource.setHostname(env.getProperty("db.hostname", "localhost"));
+ *         dataSource.setUsername(env.getRequiredProperty("db.username"));
+ *         dataSource.setPassword(env.getRequiredProperty("db.password"));
+ *         // ...
+ *         return dataSource;
+ *     }
+ * }</pre>
+ *
+ * 因为CommandLinePropertySource是使用#addFirst方法添加到Environment的MutablePropertySource集合中的，
+ * 所以它具有最高的搜索优先级，这意味着虽然 "db.hostname" 和其他属性可能存在于其他属性源中，如系统环境变量，
+ * 但它将首先从命令行属性源中选择。考虑到命令行上指定的参数自然比指定为环境变量的参数更具体，这是一种合理的方法。
+ *
+ * <p>作为注入Environment的替代方案，Spring 的@Value 注释可以用来注入这些属性，
+ * 假设 PropertySourcesPropertyResolver bean 已被注册，无论是直接注册还是通过使用 <context:property-placeholder> 元素。
+ * 例如：
+ * <pre class="code">
+ * &#064;Component
+ * public class MyComponent {
+ *
+ *     &#064;Value("my.property:defaultVal")
+ *     private String myProperty;
+ *
+ *     public void getMyProperty() {
+ *         return this.myProperty;
+ *     }
+ *
+ *     // ...
+ * }</pre>
+ *
+ * <h3>使用选项参数/h3>
+ * <p>单个命令行参数通过常用的PropertySource.getProperty(String)和 PropertySource.containsProperty(String)方法表示为属性。
+ * 例如，给定以下命令行：
+ * <pre class="code">--o1=v1 --o2</pre>
+ * 'o1'和'o2'被视为“选项参数”，以下断言的结果为true：
+ * <pre class="code">
+ * CommandLinePropertySource&lt;?&gt; ps = ...
+ * assert ps.containsProperty("o1") == true;
+ * assert ps.containsProperty("o2") == true;
+ * assert ps.containsProperty("o3") == false;
+ * assert ps.getProperty("o1").equals("v1");
+ * assert ps.getProperty("o2").equals("");
+ * assert ps.getProperty("o3") == null;
+ * </pre>
+ * 请注意，'o2' 选项没有参数，但getProperty("o2")解析为空字符串（ "" ）而不是null ，而getProperty("o3") 由于未指定，
+ * 因此解析为null 。此行为符合所有PropertySource实现都遵循的通用契约。
+ *
+ * <p>另请注意，虽然上面的示例中使用 "--" 来表示选项参数，此语法可能因各个命令行参数库而异。例如，基于 JOpt
+ * 或基于命令行的实现可能允许使用单破折号（"-"） “短”选项参数等
+ *
+ * <h3>使用非选项参数/h3>
+ * <p>通过此抽象还支持非选项参数。任何没有选项样式前缀（例如 "-" 或 "--"）提供的参数都被视为“非选项参数”，
+ * 并可通过特殊的 "nonOptionArgs" 属性使用。如果指定了多个非选项参数，则此属性的值将是包含所有参数的逗号分隔字符串。
+ * 此方法确保CommandLinePropertySource中的所有属性具有简单且一致的返回类型（String），同时在与 Spring Environment
+ * 及其内置ConversionService结合使用时适合转换。考虑以下示例：
+ *
+ * <pre class="code">--o1=v1 --o2=v2 /path/to/file1 /path/to/file2</pre>
+ *
+ * 在此示例中，"o1" 和 "o2" 将被视为“选项参数”，而这两个文件系统路径有资格作为“非选项参数”。因此，有以下断言将评估 true：
+ *
+ * <pre class="code">
+ * CommandLinePropertySource&lt;?&gt; ps = ...
+ * assert ps.containsProperty("o1") == true;
+ * assert ps.containsProperty("o2") == true;
+ * assert ps.containsProperty("nonOptionArgs") == true;
+ * assert ps.getProperty("o1").equals("v1");
+ * assert ps.getProperty("o2").equals("v2");
+ * assert ps.getProperty("nonOptionArgs").equals("/path/to/file1,/path/to/file2");
+ * </pre>
+ *
+ * <p>如上所述，与Spring Environment抽象结合使用时，这个逗号分隔的字符串可以很容易地转换为字符串数组或列表：
+ *
+ * <pre class="code">
+ * Environment env = applicationContext.getEnvironment();
+ * String[] nonOptionArgs = env.getProperty("nonOptionArgs", String[].class);
+ * assert nonOptionArgs[0].equals("/path/to/file1");
+ * assert nonOptionArgs[1].equals("/path/to/file2");
+ * </pre>
+ *
+ * <p>特殊的“非选项参数”属性的名称可以通过setNonOptionArgsPropertyName(String)方法自定义。建议这样做，
+ * 它为非选项参数提供了适当的语义值。例如，如果文件系统路径被指定为非选项参数，最好参考这些类似于 "file.locations"
+ * 而不是默认的 "nonOptionArgs" ：
+ *
+ * <pre class="code">
+ * public static void main(String[] args) {
+ *     CommandLinePropertySource clps = ...;
+ *     clps.setNonOptionArgsPropertyName("file.locations");
+ *
+ *     AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+ *     ctx.getEnvironment().getPropertySources().addFirst(clps);
+ *     ctx.register(AppConfig.class);
+ *     ctx.refresh();
+ * }</pre>
+ *
+ * <h3>局限性</h3>
+ * 这种抽象并不是为了暴露底层命令行的全部功能解析 API，例如 JOpt 或 Commons CLI。它的意图恰恰相反：
+ * 为访问命令行参数提供最简单的抽象，在它们被解析之后。所以典型的情况将涉及完全配置底层命令行解析API，
+ * 解析参数的String[] 进入 main 方法，然后简单地将解析结果提供给 CommandLinePropertySource的实现。到那时，
+ * 所有的论点都可以被视为“选项”或“非选项”参数，如上所述可以是 通过普通的PropertySource和Environment API 访问。
+ *
+ * <p>Abstract base class for {@link PropertySource} implementations backed by command line
  * arguments. The parameterized type {@code T} represents the underlying source of command
  * line options. For instance, {@link SimpleCommandLinePropertySource} uses  a String
  * array.

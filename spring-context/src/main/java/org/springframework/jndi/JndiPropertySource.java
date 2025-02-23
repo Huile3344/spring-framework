@@ -22,7 +22,15 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link PropertySource} implementation that reads properties from an underlying Spring
+ * <p>从底层 Spring JndiLocatorDelegate 读取属性的 PropertySource 实现 。
+ * <p>默认情况下，底层JndiLocatorDelegate将配置为其 "resourceRef" 属性设置为 true ，
+ * 意味着查找的名称将自动带有前缀 "java:comp/env/" 与已发布的一致 JNDI 命名约定。要覆盖此设置或更改前缀，
+ * 请手动配置JndiLocatorDelegate并将其提供给此处接受它的构造函数之一。提供自定义 JNDI 属性时也是如此。
+ * 这些应该在构建JndiPropertySource之前使用指定JndiAccessor.setJndiEnvironment(java.util.Properties)。
+ * <p>请注意， StandardServletEnvironment 默认情况下包含JndiPropertySource ，并且底层 JndiLocatorDelegate
+ * 的任何自定义都可以在 ApplicationContextInitializer 或 WebApplicationInitializer 中执行。
+ *
+ * <p>{@link PropertySource} implementation that reads properties from an underlying Spring
  * {@link JndiLocatorDelegate}.
  *
  * <p>By default, the underlying {@code JndiLocatorDelegate} will be configured with its

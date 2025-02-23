@@ -50,6 +50,15 @@ import org.springframework.util.ObjectUtils;
  * annotation provides a convenient and declarative way of adding property sources to the
  * enclosing {@code Environment}.
  *
+ * <p>表示名称/值属性对的源的抽象基类。底层的源对象可以是封装属性的任何类型T 。示例包括 Properties 对象、 Map 对象、
+ * ServletContext和ServletConfig对象（用于访问 init 参数）。探索PropertySource类型层次结构以查看提供的实现。
+ * <p>PropertySource对象通常不会单独使用，而是通过 PropertySources 对象使用，该对象聚合属性源并与 PropertyResolver
+ * 实现结合使用，该实现可以跨PropertySources集执行基于优先级的搜索。
+ * <p>PropertySource标识不是根据封装属性的内容来确定的，而是单独根据PropertySource 的 name 来确定的。
+ * 这对于操作处于集合上下文中的对象的PropertySource很有用。查看 MutablePropertySources 中的操作以及
+ * named(String)和toString()方法以了解详细信息。
+ * <p>请注意，在使用 @Configuration 注解的类时，@PropertySource 注释提供了一种方便的声明性方式将属性源添加到封闭 Environment 。
+ *
  * @author Chris Beams
  * @since 3.1
  * @param <T> the source type
@@ -63,13 +72,16 @@ public abstract class PropertySource<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	// PropertySource标识是单独根据 PropertySource 的 name 来确定的，通过名称判断两者是否相等
 	protected final String name;
 
+	// 源对象，用于获取属性值
 	protected final T source;
 
 
 	/**
 	 * Create a new {@code PropertySource} with the given name and source object.
+	 * <p>使用给定的名称和源对象创建一个新的 PropertySource。
 	 * @param name the associated name
 	 * @param source the source object
 	 */
@@ -85,6 +97,8 @@ public abstract class PropertySource<T> {
 	 * {@code Object} instance as the underlying source.
 	 * <p>Often useful in testing scenarios when creating anonymous implementations
 	 * that never query an actual source but rather return hard-coded values.
+	 * <p>使用给定的名称创建一个新的 PropertySource，并使用新的 Object 实例作为基础源。
+	 * <p>在测试场景中，创建从不查询实际源而是返回硬编码值的匿名实现时，这通常很有用。
 	 */
 	@SuppressWarnings("unchecked")
 	public PropertySource(String name) {
@@ -122,6 +136,7 @@ public abstract class PropertySource<T> {
 	/**
 	 * Return the value associated with the given name,
 	 * or {@code null} if not found.
+	 * <p>返回与给定名称关联的值，如果未找到则返回 null。
 	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
@@ -188,6 +203,16 @@ public abstract class PropertySource<T> {
 	 * <p>The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
 	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
 	 * are called.
+	 * <p>返回一个 PropertySource 实现，仅用于集合比较目的。
+	 * <p>主要用于内部使用，但给定一个 PropertySource 对象集合，可以按如下方式使用：
+	 * <pre class="code">
+	 * List&lt;PropertySource&lt;?&gt;&gt; sources = new ArrayList&lt;&gt;();
+	 * sources.add(new MapPropertySource("sourceA", mapA));
+	 * sources.add(new MapPropertySource("sourceB", mapB));
+	 * assert sources.contains(PropertySource.named("sourceA"));
+	 * assert sources.contains(PropertySource.named("sourceB"));
+	 * assert !sources.contains(PropertySource.named("sourceC"));</pre>
+	 * <p>如果调用除 equals(Object)、hashCode() 和 toString() 之外的任何方法，则返回的 PropertySource 将抛出 UnsupportedOperationException。
 	 * @param name the name of the comparison {@code PropertySource} to be created
 	 * and returned
 	 */
@@ -204,6 +229,9 @@ public abstract class PropertySource<T> {
 	 * {@code ApplicationContext}.  In such cases, a stub should be used to hold the
 	 * intended default position/order of the property source, then be replaced
 	 * during context refresh.
+	 * <p>PropertySource用作占位符，用于在应用程序上下文创建时无法急切初始化实际属性源的情况。
+	 * 例如，基于ServletContext的属性源必须等待，直到ServletContext对象可用于其封闭的ApplicationContext。
+	 * 在这种情况下，应使用存根来保存属性源的预期默认位置/顺序，然后在上下文刷新期间替换。
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources()
 	 * @see org.springframework.web.context.support.StandardServletEnvironment
 	 * @see org.springframework.web.context.support.ServletContextPropertySource
@@ -228,6 +256,7 @@ public abstract class PropertySource<T> {
 	/**
 	 * A {@code PropertySource} implementation intended for collection comparison
 	 * purposes.
+	 * <p>用于集合比较目的的 PropertySource 实现。
 	 *
 	 * @see PropertySource#named(String)
 	 */

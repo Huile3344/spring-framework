@@ -37,6 +37,14 @@ import org.springframework.util.ObjectUtils;
  * (via {@link #getProperty(String)}) in order to evaluate whether it is present
  * or not.
  *
+ * <p>一个 PropertySource 实现，能够查询其底层源对象以枚举所有可能的属性名称/值对。暴露的getPropertyName()方法，
+ * 以允许调用者自检可用属性，而无需访问底层源对象。这也有助于更有效地实现containsProperty(String) ，
+ * 因为它可以调用getPropertyNames() 并迭代返回的数组，而不是尝试调用PropertySource.getProperty(String)。
+ * 实现可以考虑缓存getPropertyNames()的结果，以充分利用这一性能机会。
+ * <p>大多数框架提供的PropertySource实现都是可枚举的；一个反例是JndiPropertySource ，其中，由于 JNDI 的性质，
+ * 不可能在任何给定时间确定所有可能的属性名称；相反，它只能尝试访问一个属性（通过PropertySource.getProperty(String))
+ * 来评估它是否存在。
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
@@ -67,6 +75,8 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	 * Return whether this {@code PropertySource} contains a property with the given name.
 	 * <p>This implementation checks for the presence of the given name within the
 	 * {@link #getPropertyNames()} array.
+	 * <p>返回此 PropertySource 是否包含具有给定名称的属性。
+	 * <p>此实现检查 getPropertyNames() 数组中是否存在给定名称
 	 * @param name the name of the property to find
 	 */
 	@Override
@@ -77,6 +87,7 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	/**
 	 * Return the names of all properties contained by the
 	 * {@linkplain #getSource() source} object (never {@code null}).
+	 * <p>返回源对象包含的所有属性的名称（永不为空）。
 	 */
 	public abstract String[] getPropertyNames();
 

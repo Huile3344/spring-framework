@@ -28,7 +28,24 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
+ * <p>由 JOpt OptionSet支持的CommandLinePropertySource实现。
+ * <h2>典型用法</h2>
+ * <p>针对提供给main方法的String[]参数进行配置并执行OptionParser ，使用生成的OptionSet对象创建一个
+ * JOptCommandLinePropertySource ：
+ * <pre class="code">
+ * public static void main(String[] args) {
+ *     OptionParser parser = new OptionParser();
+ *     parser.accepts("option1");
+ *     parser.accepts("option2").withRequiredArg();
+ *     OptionSet options = parser.parse(args);
+ *     PropertySource&lt;?&gt; ps = new JOptCommandLinePropertySource(options);
+ *     // ...
+ * }</pre>
+ * <p>如果一个选项有多种表示形式，则期望最具描述性的表示形式最后设置，并用作属性名称关联 EnumerablePropertySource.getPropertyNames()。
+ * <p>有关完整的常规用法示例，请参阅 CommandLinePropertySource 。
+ * <p>需要 JOpt Simple 4.3 或更高版本。针对 JOpt 进行的测试，直至 5.0。
+ *
+ * <p>{@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
  *
  * <h2>Typical usage</h2>
  *

@@ -22,7 +22,53 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link CommandLinePropertySource} implementation backed by a simple String array.
+ * CommandLinePropertySource 实现由简单的字符串数组支持。参数使用 SimpleCommandLineArgsParser解析得到CommandLineArgs
+ * <h3>目的</h3>
+ * <p>此CommandLinePropertySource实现旨在提供最简单的方法来解析命令行参数。与所有CommandLinePropertySource实现一样，
+ * 命令行参数分为两个不同的组：选项参数和非选项参数，如下所述（从SimpleCommandLineArgsParser的 Javadoc 复制的一些部分） ：
+ * <h3>使用选项参数</h3>
+ * <p>选项参数必须遵守确切的语法：
+ * <pre class="code">--optName[=optValue]</pre>
+ *
+ * <p>也就是说，选项必须以 "--" 为前缀，可以也可以不指定一个值。如果指定了值，则名称和值必须以不带空格的等号（“=”）分开。
+ * 该值可以可选地是一个空字符串。
+ * <h4>选项参数的有效示例</h4>
+ * <pre class="code">
+ * --foo
+ * --foo=
+ * --foo=""
+ * --foo=bar
+ * --foo="bar then baz"
+ * --foo=bar,baz,biz</pre>
+ * <h4>选项参数的无效示例</h4>
+ * <pre class="code">
+ * -foo
+ * --foo bar
+ * --foo = bar
+ * --foo=bar --foo=baz --foo=biz</pre>
+ *
+ * <h3>选项参数结束</h3>
+ * <p>底层解析器支持 POSIX“选项结束”分隔符，这意味着命令行中的任何"--" （空选项名称）都表明所有剩余参数都是非选项参数。
+ * 例如， "--opt1=ignored" ， 以下命令行中的"--opt2"和"filename"是被认为是非选项参数。
+ *  <pre class="code">
+ *  --foo=bar -- --opt1=ignored -opt2 filename</pre>
+ *
+ *  <h3>使用非选项参数</h3>
+ * <p>“选项结束”分隔符 ( -- ) 后面的任何参数或在没有“ -- ”选项前缀的情况下指定的任何参数都将被视为 “非选项参数”
+ * 并通过 CommandLineArgs.getNonOptionArgs() 方法。
+ *
+ *  <h3>典型用法</h3>
+ *  <pre class="code">
+ * public static void main(String[] args) {
+ *     PropertySource<?> ps = new SimpleCommandLinePropertySource(args);
+ *     // ...
+ * }</pre>
+ * 有关完整的常规用法示例，请参阅 CommandLinePropertySource 。
+ *
+ *  <h3>超越基础知识</h3>
+ * <p>当需要更全功能的命令行解析时，请考虑针对您选择的命令行解析库实现您自己的CommandLinePropertySource 。
+ *
+ * <p>{@link CommandLinePropertySource} implementation backed by a simple String array.
  *
  * <h3>Purpose</h3>
  * <p>This {@code CommandLinePropertySource} implementation aims to provide the simplest
@@ -95,7 +141,8 @@ import org.springframework.util.StringUtils;
 public class SimpleCommandLinePropertySource extends CommandLinePropertySource<CommandLineArgs> {
 
 	/**
-	 * Create a new {@code SimpleCommandLinePropertySource} having the default name
+	 * 创建一个具有默认名称并由给定的命令行参数 String[] 支持的新 SimpleCommandLinePropertySource。
+	 * <p>Create a new {@code SimpleCommandLinePropertySource} having the default name
 	 * and backed by the given {@code String[]} of command line arguments.
 	 * @see CommandLinePropertySource#COMMAND_LINE_PROPERTY_SOURCE_NAME
 	 * @see CommandLinePropertySource#CommandLinePropertySource(Object)

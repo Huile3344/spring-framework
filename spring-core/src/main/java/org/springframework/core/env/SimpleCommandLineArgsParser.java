@@ -17,7 +17,39 @@
 package org.springframework.core.env;
 
 /**
- * Parses a {@code String[]} of command line arguments in order to populate a
+ * 解析命令行参数的 String[] 以填充 CommandLineArgs 对象。
+ * <h3>使用选项参数</h3>
+ * <p>选项参数必须遵循确切的语法：
+ * <pre class="code">--optName[=optValue]</pre>
+ * <p>也就是说，选项必须以“--”为前缀，并且可以指定或不指定值。如果指定了值，则名称和值必须用等号（“=”）分隔，
+ * 中间不带空格。值可以是空字符串。
+ * <h4>选项参数的有效示例</h4>
+ * <pre class="code">
+ * --foo
+ * --foo=
+ * --foo=""
+ * --foo=bar
+ * --foo="bar then baz"
+ * --foo=bar,baz,biz</pre>
+ *
+ * <h4>选项参数的无效示例</h4>
+ * <pre class="code">
+ * -foo
+ * --foo bar
+ * --foo = bar
+ * --foo=bar --foo=baz --foo=biz</pre>
+ *
+ * <h3>选项参数结束</h3>
+ * <p>此解析器支持 POSIX“选项结束”分隔符，这意味着命令行中的任何“--”（空选项名称）都表示所有剩余参数都是非选项参数。
+ * 例如，以下命令行中的“--opt1=ignored”、“--opt2”和“filename”被视为非选项参数。
+ * <pre class="code">
+ * --foo=bar -- --opt1=ignored -opt2 filename</pre>
+ *
+ * <h3>使用非选项参数</h3>
+ * <p>任何位于“选项结束”分隔符 (--) 之后或未指定“--”选项前缀的参数都将被视为“非选项参数”，
+ * 并通过 CommandLineArgs.getNonOptionArgs() 方法提供。
+ *
+ * <p>Parses a {@code String[]} of command line arguments in order to populate a
  * {@link CommandLineArgs} object.
  *
  * <h3>Working with option arguments</h3>
@@ -70,7 +102,8 @@ package org.springframework.core.env;
 class SimpleCommandLineArgsParser {
 
 	/**
-	 * Parse the given {@code String} array based on the rules described {@linkplain
+	 * 根据上面描述的规则解析给定的字符串数组，返回一个完全填充的 CommandLineArgs 对象。
+	 * <p>Parse the given {@code String} array based on the rules described {@linkplain
 	 * SimpleCommandLineArgsParser above}, returning a fully-populated
 	 * {@link CommandLineArgs} object.
 	 * @param args command line arguments, typically from a {@code main()} method

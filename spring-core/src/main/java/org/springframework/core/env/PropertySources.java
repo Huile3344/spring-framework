@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Holder containing one or more {@link PropertySource} objects.
+ * <p>包含一个或多个 PropertySource 对象的持有者。
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -33,6 +34,7 @@ public interface PropertySources extends Iterable<PropertySource<?>> {
 
 	/**
 	 * Return a sequential {@link Stream} containing the property sources.
+	 * <p>返回包含 PropertySource 的顺序流。
 	 * @since 5.1
 	 */
 	default Stream<PropertySource<?>> stream() {
@@ -41,12 +43,14 @@ public interface PropertySources extends Iterable<PropertySource<?>> {
 
 	/**
 	 * Return whether a property source with the given name is contained.
+	 * <p>返回是否包含具有给定名称的 PropertySource。
 	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
 	 */
 	boolean contains(String name);
 
 	/**
 	 * Return the property source with the given name, {@code null} if not found.
+	 * <p>返回具有给定名称的 PropertySource，如果未找到则返回 null。
 	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
 	 */
 	@Nullable

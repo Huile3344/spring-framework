@@ -26,7 +26,8 @@ import java.util.Set;
 import org.springframework.lang.Nullable;
 
 /**
- * A simple representation of command line arguments, broken into
+ * 命令行参数的简单表示，分为选项参数和非选项参数。
+ * <p>A simple representation of command line arguments, broken into
  * {@linkplain #addOptionArg(String, String) option arguments} and
  * {@linkplain #addNonOptionArg(String) non-option arguments}.
  *

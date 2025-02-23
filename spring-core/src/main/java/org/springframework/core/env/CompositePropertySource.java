@@ -36,6 +36,11 @@ import org.springframework.util.StringUtils;
  * of plain {@link PropertySource}, exposing {@link #getPropertyNames()} based on the
  * accumulated property names from all contained sources (as far as possible).
  *
+ * <p>复合 PropertySource 实现，其迭代一组 PropertySource 实例。在多个属性源共享相同的名称的情况下是必要的，
+ * 例如，当向 @PropertySource 提供多个值时。
+ * <p>从 Spring 4.1.2 开始，此类扩展了 EnumerablePropertySource 而不是普通的 PropertySource ，
+ * 根据所有包含的源（尽可能）累积的属性名称公开 getPropertyNames() 。
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
