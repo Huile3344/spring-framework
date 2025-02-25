@@ -23,7 +23,9 @@ import java.util.function.Supplier;
 import org.springframework.lang.Nullable;
 
 /**
- * Default "no op" {@code ApplicationStartup} implementation.
+ * 默认“无操作” ApplicationStartup 实现。
+ * <p>此变体旨在实现最低开销，并且不记录事件。
+ * <p>Default "no op" {@code ApplicationStartup} implementation.
  *
  * <p>This variant is designed for minimal overhead and does not record events.
  *

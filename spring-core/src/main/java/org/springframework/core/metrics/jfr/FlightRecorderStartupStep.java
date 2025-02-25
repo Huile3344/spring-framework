@@ -23,7 +23,10 @@ import java.util.function.Supplier;
 import org.springframework.core.metrics.StartupStep;
 
 /**
- * {@link StartupStep} implementation for the Java Flight Recorder.
+ * Java Flight Recorder 的 StartupStep 实现。
+ * <p>此变体委托给 JFR 事件扩展来收集和记录 Java Flight Recorder 中的数据。
+ *
+ * <p>{@link StartupStep} implementation for the Java Flight Recorder.
  *
  * <p>This variant delegates to a {@link FlightRecorderStartupEvent JFR event extension}
  * to collect and record data in Java Flight Recorder.

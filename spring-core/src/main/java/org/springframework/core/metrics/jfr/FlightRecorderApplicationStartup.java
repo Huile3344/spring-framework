@@ -24,7 +24,12 @@ import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
 
 /**
- * {@link ApplicationStartup} implementation for the Java Flight Recorder.
+ * Java Flight Recorder 的 ApplicationStartup 实现。
+ * <p>此变体将 StartupStep 记录为 Flight Recorder 事件。由于此类事件仅支持基本类型，
+ * 因此 StartupStep.Tags 被序列化为单个字符串属性。
+ * <p>在应用程序上下文中配置此项后，您可以通过启动启用了记录的应用程序来记录数据：
+ * java -XX:StartFlightRecording:filename=recording.jfr,duration=10s -jar app.jar。
+ * <p>{@link ApplicationStartup} implementation for the Java Flight Recorder.
  * <p>This variant records {@link StartupStep} as Flight Recorder events. Because
  * such events only support base types, the
  * {@link org.springframework.core.metrics.StartupStep.Tags} are serialized as a

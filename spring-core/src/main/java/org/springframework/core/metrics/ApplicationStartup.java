@@ -17,7 +17,10 @@
 package org.springframework.core.metrics;
 
 /**
- * Instruments the application startup phase using {@link StartupStep steps}.
+ * 使用步骤检测应用程序启动阶段。
+ * <p>核心容器及其基础架构组件可以使用 ApplicationStartup 标记应用程序启动期间的步骤并收集有关执行
+ * 上下文或其处理时间的数据。
+ * <p>Instruments the application startup phase using {@link StartupStep steps}.
  * <p>The core container and its infrastructure components can use the {@code ApplicationStartup}
  * to mark steps during the application startup and collect data about the execution context
  * or their processing time.
@@ -28,13 +31,18 @@ package org.springframework.core.metrics;
 public interface ApplicationStartup {
 
 	/**
-	 * Default "no op" {@code ApplicationStartup} implementation.
+	 * 默认“无操作”ApplicationStartup 实现。
+	 * <p>此变体旨在实现最低开销，并且不记录数据。
+	 * <p>Default "no op" {@code ApplicationStartup} implementation.
 	 * <p>This variant is designed for minimal overhead and does not record data.
 	 */
 	ApplicationStartup DEFAULT = new DefaultApplicationStartup();
 
 	/**
-	 * Create a new step and marks its beginning.
+	 * 创建新步骤并标记其开始。
+	 * <p>步骤名称描述当前操作或阶段。此技术名称应为“.”命名空间，并且可以在应用程序启动期间重复
+	 * 使用以描述同一步骤的其他实例。
+	 * <p>Create a new step and marks its beginning.
 	 * <p>A step name describes the current action or phase. This technical
 	 * name should be "." namespaced and can be reused to describe other instances of
 	 * the same step during application startup.
