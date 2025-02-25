@@ -19,7 +19,38 @@ package org.springframework.core.env;
 import java.util.Map;
 
 /**
- * Configuration interface to be implemented by most if not all {@link Environment} types.
+ * 配置接口将由大多数（如果不是全部） Environment 类型实现。 提供用于设置活动和默认 profiles 以及操作底层的设施的
+ * 属性源。允许客户设置和验证所需的属性，自定义转换服务，以及通过 ConfigurablePropertyResolver 超级接口的更多能力。
+ * <h2>操纵属性源</h2>
+ * <p>属性源可能会被删除、重新排序或替换；可以使用 从getPropertySources()返回的 MutablePropertySources 实例添加
+ * 其他属性源。以下示例针对StandardEnvironment 的实现 ConfigurableEnvironment ，但通常适用于任何实现， 尽管特定
+ * 的默认属性来源可能有所不同。
+ * <h4>示例：添加具有最高搜索优先级的新属性源</h4>
+ * <pre class="code">
+ * ConfigurableEnvironment environment = new StandardEnvironment();
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * Map&lt;String, Object&gt; myMap = new HashMap&lt;&gt;();
+ * myMap.put("xyz", "myValue");
+ * propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
+ * </pre>
+ *
+ * <h4>示例：删除默认系统属性属性源</h4>
+ * <pre class="code">
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * propertySources.remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
+ * </pre>
+ *
+ * <h4>示例：出于测试目的模拟系统环境</h4>
+ * <pre class="code">
+ * MutablePropertySources propertySources = environment.getPropertySources();
+ * MockPropertySource mockEnvVars = new MockPropertySource().withProperty("xyz", "myValue");
+ * propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
+ * </pre>
+ *
+ * <p>当ApplicationContext使用 Environment 时，在调用上下文的 refresh() 之前执行任何此类 PropertySource 操作很重要。
+ * 这确保了在容器引导过程中所有属性源都可用，包括属性占位符配置者的使用。
+ *
+ * <p>Configuration interface to be implemented by most if not all {@link Environment} types.
  * Provides facilities for setting active and default profiles and manipulating underlying
  * property sources. Allows clients to set and validate required properties, customize the
  * conversion service and more through the {@link ConfigurablePropertyResolver}
@@ -72,7 +103,10 @@ import java.util.Map;
 public interface ConfigurableEnvironment extends Environment, ConfigurablePropertyResolver {
 
 	/**
-	 * Specify the set of profiles active for this {@code Environment}. Profiles are
+	 * 指定此环境的活动配置文件集。在容器引导期间评估配置文件以确定是否应向容器注册 bean 定义。
+	 * 任何现有的活动配置文件都将被给定的参数替换；使用零参数调用可清除当前的活动配置文件集。
+	 * 使用 addActiveProfile 添加配置文件，同时保留现有配置文件集。
+	 * <p>Specify the set of profiles active for this {@code Environment}. Profiles are
 	 * evaluated during container bootstrap to determine whether bean definitions
 	 * should be registered with the container.
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
@@ -87,14 +121,16 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	void setActiveProfiles(String... profiles);
 
 	/**
-	 * Add a profile to the current set of active profiles.
+	 * 将配置文件添加到当前活动配置文件集中。
+	 * <p>Add a profile to the current set of active profiles.
 	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
 	 * @see #setActiveProfiles
 	 */
 	void addActiveProfile(String profile);
 
 	/**
-	 * Specify the set of profiles to be made active by default if no other profiles
+	 * 如果没有通过 setActiveProfiles 明确激活其他配置文件，则指定默认激活的配置文件集。
+	 * <p>Specify the set of profiles to be made active by default if no other profiles
 	 * are explicitly made active through {@link #setActiveProfiles}.
 	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
@@ -102,7 +138,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	void setDefaultProfiles(String... profiles);
 
 	/**
-	 * Return the {@link PropertySources} for this {@code Environment} in mutable form,
+	 * 以可变形式返回此环境的 PropertySources，允许操作在针对此环境对象解析属性时应搜索的 PropertySource 对象集。
+	 * 各种 MutablePropertySources 方法（例如 addFirst、addLast、addBefore 和 addAfter）允许对属性源排序进行
+	 * 细粒度控制。这很有用，例如，可确保某些用户定义的属性源的搜索优先级高于默认属性源（例如系统属性集或系统环境变量集）。
+	 * <p>Return the {@link PropertySources} for this {@code Environment} in mutable form,
 	 * allowing for manipulation of the set of {@link PropertySource} objects that should
 	 * be searched when resolving properties against this {@code Environment} object.
 	 * The various {@link MutablePropertySources} methods such as
@@ -119,7 +158,9 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	MutablePropertySources getPropertySources();
 
 	/**
-	 * Return the value of {@link System#getProperties()}.
+	 * 返回 System.getProperties() 的值。
+	 * <p>请注意，大多数环境实现都会将此系统属性映射作为要搜索的默认 PropertySource。因此，建议不要直接使用此方法，除非明确打算绕过其他属性源。
+	 * <p>Return the value of {@link System#getProperties()}.
 	 * <p>Note that most {@code Environment} implementations will include this system
 	 * properties map as a default {@link PropertySource} to be searched. Therefore, it is
 	 * recommended that this method not be used directly unless bypassing other property
@@ -128,7 +169,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	Map<String, Object> getSystemProperties();
 
 	/**
-	 * Return the value of {@link System#getenv()}.
+	 * 返回 System.getenv() 的值。
+	 * <p>请注意，大多数 Environment 实现都会将此系统环境映射作为要搜索的默认 PropertySource。因此，
+	 * 建议不要直接使用此方法，除非明确打算绕过其他属性源。
+	 * <p>Return the value of {@link System#getenv()}.
 	 * <p>Note that most {@link Environment} implementations will include this system
 	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
 	 * is recommended that this method not be used directly unless bypassing other
@@ -137,7 +181,13 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	Map<String, Object> getSystemEnvironment();
 
 	/**
-	 * Append the given parent environment's active profiles, default profiles and
+	 * 将给定父环境的活动配置文件、默认配置文件和属性源附加到此（子）环境各自的集合中。
+	 * <p>对于父环境和子环境中存在的任何同名 PropertySource 实例，应保留子实例并丢弃父实例。
+	 * 这允许子环境覆盖属性源，并避免通过常见属性源类型（例如系统环境和系统属性）进行冗余搜索。
+	 * <p>活动和默认配置文件名称也会被过滤掉重复项，以避免混淆和冗余存储。
+	 * <p>父环境在任何情况下都保持不变。请注意，在调用合并后对父环境发生的任何更改都不会反映在子环境中。
+	 * 因此，在调用合并之前，应注意配置父属性源和配置文件信息。
+	 * <p>Append the given parent environment's active profiles, default profiles and
 	 * property sources to this (child) environment's respective collections of each.
 	 * <p>For any identically-named {@code PropertySource} instance existing in both
 	 * parent and child, the child instance is to be preserved and the parent instance

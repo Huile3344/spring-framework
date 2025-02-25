@@ -17,7 +17,24 @@
 package org.springframework.core.env;
 
 /**
- * Interface representing the environment in which the current application is running.
+ * 代表当前应用程序运行环境的接口。 对应用程序环境的两个关键方面进行建模：配置文件(profiles)和属性(properties)。
+ * 与属性访问相关的方法通过 PropertyResolver 超级接口暴露。
+ * <p>profile 是一个命名的、逻辑的 bean 定义组，仅当给定的 profile 文件处于活动状态时才会向容器注册。
+ * Bean 可以分配给 profile，无论是在 XML 中还是通过注释定义；有关语法详细信息，请参阅 spring-beans 3.1 架构
+ * 或@Profile注释。与 profile 相关的Environment对象的作用是确定哪些 profile（如果有）当前处于活动状态，
+ * 以及默认情况下哪些 profile（如果有）应该处于活动状态。
+ * <p>属性在几乎所有应用程序中都发挥着重要作用，并且可能源自多种来源：属性文件、JVM 系统属性、系统环境变量、
+ * JNDI、Servlet 上下文参数、临时属性对象、映射等。 与属性相关的Environment对象的作用就是为用户提供一个方便的服务接口，
+ * 用于配置属性源并从中解析属性。
+ * <p>在ApplicationContext中管理的Environment Bean 可通过 EnvironmentAware 或@Inject 注册，以便直接查询 profile
+ * 文件状态或解析属性。
+ * <p>然而，在大多数情况下，应用程序级 bean 不需要直接与Environment 交互，而是可以请求将${...}属性值替换为
+ * 属性占位符配置程序，例如 PropertySourcesPlaceholderConfigurer，它本身是EnvironmentAware ，并且在
+ * 使用 <context:property-placeholder/> 时默认注册。
+ * <p>必须通过 AbstractApplicationContext子类getEnvironment()方法返回的 ConfigurableEnvironment接口
+ * 来配置Environment对象。看 ConfigurableEnvironment Javadoc 用于演示在应用程序refresh()之前对属性源进行
+ * 操作的使用示例。
+ * <p>Interface representing the environment in which the current application is running.
  * Models two key aspects of the application environment: <em>profiles</em> and
  * <em>properties</em>. Methods related to property access are exposed via the
  * {@link PropertyResolver} superinterface.
@@ -72,7 +89,11 @@ package org.springframework.core.env;
 public interface Environment extends PropertyResolver {
 
 	/**
-	 * Return the set of profiles explicitly made active for this environment. Profiles
+	 * 返回为此环境明确激活的 profile 集。profile 用于创建有条件注册的 bean 定义的逻辑分组，
+	 * 例如基于部署环境。可以通过将“spring.profiles.active”设置为系统属性或调用
+	 * ConfigurableEnvironment.setActiveProfiles(String...) 来激活 profile。
+	 * <p>如果没有明确指定 profile 为活动配置文件，则将自动激活任何默认配置文件。
+	 * <p>Return the set of profiles explicitly made active for this environment. Profiles
 	 * are used for creating logical groupings of bean definitions to be registered
 	 * conditionally, for example based on deployment environment. Profiles can be
 	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
@@ -87,7 +108,8 @@ public interface Environment extends PropertyResolver {
 	String[] getActiveProfiles();
 
 	/**
-	 * Return the set of profiles to be active by default when no active profiles have
+	 * 当没有明确设置激活 profile 时，返回默认激活的 profile 集。
+	 * <p>Return the set of profiles to be active by default when no active profiles have
 	 * been set explicitly.
 	 * @see #getActiveProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
@@ -96,7 +118,12 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
-	 * Determine whether one of the given profile expressions matches the
+	 * 确定给定的 profile 表达式之一是否与激活的 profile 匹配 - 或者在没有明确激活的 profile 的情况下，
+	 * 给定的 profile 表达式之一是否与默认 profile 匹配。
+	 * <p>profile 表达式允许表达复杂的布尔 profile 逻辑 - 例如“p1 & p2”、“(p1 & p2) | p3”等。
+	 * 有关支持的表达式语法的详细信息，请参阅 Profiles.of(String...)。
+	 * <p>此方法是 env.acceptsProfiles(Profiles.of(profileExpressions)) 的便捷快捷方式。
+	 * <p>Determine whether one of the given profile expressions matches the
 	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
 	 * of no explicit active profiles, whether one of the given profile expressions
 	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
@@ -115,7 +142,12 @@ public interface Environment extends PropertyResolver {
 	}
 
 	/**
-	 * Determine whether one or more of the given profiles is active &mdash; or
+	 * 确定给定的配置文件中是否有一个或多个处于活动状态 — 或者，在没有明确激活的 profile 的情况下，
+	 * 给定的 profile 中是否有一个或多个包含在默认 profile 集中。
+	 * <p>如果 profile 以“！”开头，则逻辑将被反转，这意味着如果给定的 profile 不处于活动状态，
+	 * 则此方法将返回 true。例如，如果 profile “p1”处于活动状态或“p2”不处于活动状态，
+	 * 则 env.acceptsProfiles("p1", "!p2") 将返回 true。
+	 * <p>Determine whether one or more of the given profiles is active &mdash; or
 	 * in the case of no explicit {@linkplain #getActiveProfiles() active profiles},
 	 * whether one or more of the given profiles is included in the set of
 	 * {@linkplain #getDefaultProfiles() default profiles}.
@@ -137,7 +169,10 @@ public interface Environment extends PropertyResolver {
 	boolean acceptsProfiles(String... profiles);
 
 	/**
-	 * Determine whether the given {@link Profiles} predicate matches the
+	 * 确定给定的 Profiles 谓词是否与活动 profile 匹配 — 或者在没有明确活动 profile 的情况下，
+	 * 给定的 Profiles 谓词是否与默认 profile 匹配。
+	 * <p>如果您希望直接以字符串形式提供配置文件表达式，请改用 matchesProfiles(String...)。
+	 * <p>Determine whether the given {@link Profiles} predicate matches the
 	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
 	 * of no explicit active profiles, whether the given {@code Profiles} predicate
 	 * matches the {@linkplain #getDefaultProfiles() default profiles}.

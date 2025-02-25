@@ -20,7 +20,9 @@ import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.lang.Nullable;
 
 /**
- * Configuration interface to be implemented by most if not all {@link PropertyResolver}
+ * 大多数（不是全部） PropertyResolver 类型都会实现配置接口。提供访问和定制 ConversionService 的基础设施，
+ * ConversionService 用于将属性值从一种类型转换为另一种类型。
+ * <p>Configuration interface to be implemented by most if not all {@link PropertyResolver}
  * types. Provides facilities for accessing and customizing the
  * {@link org.springframework.core.convert.ConversionService ConversionService}
  * used when converting property values from one type to another.
@@ -32,7 +34,14 @@ import org.springframework.lang.Nullable;
 public interface ConfigurablePropertyResolver extends PropertyResolver {
 
 	/**
-	 * Return the {@link ConfigurableConversionService} used when performing type
+	 * 返回在对属性执行类型转换时使用的 ConfigurableConversionService。
+	 * 返回的转换服务的可配置性允许方便地添加和删除单个 Converter 实例：
+	 * <pre class="code">
+	 * ConfigurableConversionService cs = env.getConversionService();
+	 * cs.addConverter(new FooConverter());
+	 * </pre>
+	 *
+	 * <p>Return the {@link ConfigurableConversionService} used when performing type
 	 * conversions on properties.
 	 * <p>The configurable nature of the returned conversion service allows for
 	 * the convenient addition and removal of individual {@code Converter} instances:
@@ -46,7 +55,10 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	ConfigurableConversionService getConversionService();
 
 	/**
-	 * Set the {@link ConfigurableConversionService} to be used when performing type
+	 * 设置在对属性执行类型转换时要使用的 ConfigurableConversionService。
+	 * <p>注意：作为完全替换 ConversionService 的替代方法，请考虑通过深入研究 getConversionService()
+	 * 并调用 #addConverter 等方法来添加或删除单个 Converter 实例。
+	 * <p>Set the {@link ConfigurableConversionService} to be used when performing type
 	 * conversions on properties.
 	 * <p><strong>Note:</strong> as an alternative to fully replacing the
 	 * {@code ConversionService}, consider adding or removing individual
@@ -59,31 +71,39 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	void setConversionService(ConfigurableConversionService conversionService);
 
 	/**
-	 * Set the prefix that placeholders replaced by this resolver must begin with.
+	 * 设置该解析器替换的占位符必须以其开头的前缀。
+	 * <p>Set the prefix that placeholders replaced by this resolver must begin with.
 	 */
 	void setPlaceholderPrefix(String placeholderPrefix);
 
 	/**
-	 * Set the suffix that placeholders replaced by this resolver must end with.
+	 * 设置该解析器替换的占位符必须以此后缀结尾。
+	 * <p>Set the suffix that placeholders replaced by this resolver must end with.
 	 */
 	void setPlaceholderSuffix(String placeholderSuffix);
 
 	/**
-	 * Specify the separating character between the placeholders replaced by this
+	 * 指定此解析器替换的占位符与其关联的默认值之间的分隔字符，如果不应将此类特殊字符处理为值分隔符，则为 null。
+	 * <p>Specify the separating character between the placeholders replaced by this
 	 * resolver and their associated default value, or {@code null} if no such
 	 * special character should be processed as a value separator.
 	 */
 	void setValueSeparator(@Nullable String valueSeparator);
 
 	/**
-	 * Specify the escape character to use to ignore placeholder prefix or
+	 * 指定用于忽略占位符前缀或值分隔符的转义字符，如果不应进行转义，则为 null。
+	 * <p>Specify the escape character to use to ignore placeholder prefix or
 	 * value separator, or {@code null} if no escaping should take place.
 	 * @since 6.2
 	 */
 	void setEscapeCharacter(@Nullable Character escapeCharacter);
 
 	/**
-	 * Set whether to throw an exception when encountering an unresolvable placeholder
+	 * 设置在给定属性的值中嵌套无法解析的占位符时是否抛出异常。
+	 * false 值表示严格解析，即会抛出异常。
+	 * true 值表示无法解析的嵌套占位符应以未解析的 ${...} 形式传递。
+	 * <p>getProperty(String) 及其变体的实现必须检查此处设置的值，以确定当属性值包含无法解析的占位符时正确的行为。
+	 * <p>Set whether to throw an exception when encountering an unresolvable placeholder
 	 * nested within the value of a given property. A {@code false} value indicates strict
 	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
 	 * that unresolvable nested placeholders should be passed through in their unresolved
@@ -96,13 +116,15 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders);
 
 	/**
-	 * Specify which properties must be present, to be verified by
+	 * 指定必须存在的属性，以通过validateRequiredProperties（）进行验证。
+	 * <p>Specify which properties must be present, to be verified by
 	 * {@link #validateRequiredProperties()}.
 	 */
 	void setRequiredProperties(String... requiredProperties);
 
 	/**
-	 * Validate that each of the properties specified by
+	 * 验证 setRequiredProperties 指定的每个属性是否存在且解析为非空值。
+	 * <p>Validate that each of the properties specified by
 	 * {@link #setRequiredProperties} is present and resolves to a
 	 * non-{@code null} value.
 	 * @throws MissingRequiredPropertiesException if any of the required

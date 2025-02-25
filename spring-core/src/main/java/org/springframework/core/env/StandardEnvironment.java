@@ -17,7 +17,24 @@
 package org.springframework.core.env;
 
 /**
- * {@link Environment} implementation suitable for use in 'standard' (i.e. non-web)
+ * 适合在“标准”（即非web）应用程序中使用的 Environment 实现 。
+ *
+ * <p>除了 ConfigurableEnvironment 的常用功能之外，例如属性解析和 profile 相关的操作，这个实现类配置了
+ * 两个默认属性源，按以下顺序搜索：
+ * <ul>
+ * <li>system properties
+ * <li>system environment variables
+ *</ul>
+ * <p>也就是说，如果键“xyz”存在于 JVM 系统属性中，也存在于当前进程的环境变量集中，键“xyz”的值将从系统属性
+ * environment.getProperty("xyz")调用中返回 。 默认情况下会选择此顺序，因为系统属性是针对每个 JVM 的，
+ * 而给定系统上的许多 JVM 中的环境变量可能是相同的。赋予系统属性优先权允许在每个JVM的基础上重写环境变量。
+ * <p>这些默认属性源可以被删除、重新排序或替换；并且可以使用 AbstractEnvironment.getPropertySources()
+ * 中提供的 MutablePropertySources 实例添加其他属性源。有关使用示例，请参阅 ConfigurableEnvironment
+ * Javadoc 的使用示例。
+ * <p>参阅 SystemEnvironmentPropertySource javadoc 了解有关 shell 环境（例如 Bash）中属性名称特殊
+ * 处理的详细信息，这些环境不允许在变量名称中使用句点字符。
+ *
+ * <p>{@link Environment} implementation suitable for use in 'standard' (i.e. non-web)
  * applications.
  *
  * <p>In addition to the usual functions of a {@link ConfigurableEnvironment} such as
@@ -80,7 +97,13 @@ public class StandardEnvironment extends AbstractEnvironment {
 
 
 	/**
-	 * Customize the set of property sources with those appropriate for any standard
+	 * 使用适合任何标准 Java 环境的属性源自定义属性源集：
+	 * <ul>
+	 * <li>“systemProperties”
+	 * <li>“systemEnvironment”
+	 * </ul>
+	 * <p>“systemProperties”中的属性将优先于“systemEnvironment”中的属性。
+	 * <p>Customize the set of property sources with those appropriate for any standard
 	 * Java environment:
 	 * <ul>
 	 * <li>{@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}

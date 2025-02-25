@@ -21,7 +21,11 @@ import java.util.Properties;
 import org.springframework.lang.Nullable;
 
 /**
- * Utility class for working with Strings that have placeholder values in them.
+ * 用于处理包含占位符值的字符串的实用程序类。
+ * <p>占位符采用 ${name} 形式。使用 PropertyPlaceholderHelper 可以将这些占位符替换为用户提供的值。
+ * <p>可以使用 Properties 实例或 PropertyPlaceholderHelper.PlaceholderResolver 提供替换值。
+ *
+ * <p>Utility class for working with Strings that have placeholder values in them.
  *
  * <p>A placeholder takes the form {@code ${name}}. Using {@code PropertyPlaceholderHelper}
  * these placeholders can be substituted for user-supplied values.
@@ -120,13 +124,15 @@ public class PropertyPlaceholderHelper {
 
 
 	/**
-	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.
+	 * 用于解析字符串中包含的占位符的替换值的策略接口。
+	 * <p>Strategy interface used to resolve replacement values for placeholders contained in Strings.
 	 */
 	@FunctionalInterface
 	public interface PlaceholderResolver {
 
 		/**
-		 * Resolve the supplied placeholder name to the replacement value.
+		 * 将提供的占位符名称解析为替换值。
+		 * <p>Resolve the supplied placeholder name to the replacement value.
 		 * @param placeholderName the name of the placeholder to resolve
 		 * @return the replacement value, or {@code null} if no replacement is to be made
 		 */

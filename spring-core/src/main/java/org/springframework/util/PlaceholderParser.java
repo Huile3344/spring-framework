@@ -31,7 +31,17 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 /**
- * Parser for Strings that have placeholder values in them. In its simplest form,
+ * 包含占位符值的字符串解析器。占位符最简单的形式为 ${name}，其中 name 是可以使用
+ * PlaceholderResolver 解析的键，${ 是前缀，} 是后缀。
+ * <p>如果占位符的键不代表已知属性，则占位符也可以具有默认值。使用分隔符将默认值与键分开。
+ * 例如，如果占位符解析器未提供 name 属性的值，则 ${name:John} 解析为 John。
+ * <p>占位符还可以具有更复杂的结构，给定键的解析可能涉及嵌套占位符的解析。默认值也可以有占位符。
+ * <p>对于有效占位符的语法与必须按原样呈现的字符串匹配的情况，可以使用转义字符对占位符进行转义。
+ * 例如 \${name} 解析为 ${name}。
+ * <p>前缀、后缀、分隔符和转义字符都是可配置的。只有前缀和后缀是强制性的，对默认值或转义的支持
+ * 取决于为它们提供非空值。
+ * <p>此解析器确保尽可能延迟地解析占位符。
+ * <p>Parser for Strings that have placeholder values in them. In its simplest form,
  * a placeholder takes the form of {@code ${name}}, where {@code name} is the key
  * that can be resolved using a {@link PlaceholderResolver PlaceholderResolver},
  * <code>${</code> the prefix, and <code>}</code> the suffix.
@@ -295,7 +305,8 @@ final class PlaceholderParser {
 
 
 	/**
-	 * Provide the necessary context to handle and resolve underlying placeholders.
+	 * 提供必要的上下文来处理和解析底层占位符。
+	 * <p>Provide the necessary context to handle and resolve underlying placeholders.
 	 */
 	static class PartResolutionContext implements PlaceholderResolver {
 

@@ -23,7 +23,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
 
 /**
- * Specialization of {@link ConfigurableEnvironment} allowing initialization of
+ * 专业化的 ConfigurableEnvironment 允许在 ServletContext 和（可选）ServletConfig 可用的
+ * 最早时刻初始化与 servlet 相关的 PropertySource 对象。
+ * <p>Specialization of {@link ConfigurableEnvironment} allowing initialization of
  * servlet-related {@link org.springframework.core.env.PropertySource} objects at the
  * earliest moment that the {@link ServletContext} and (optionally) {@link ServletConfig}
  * become available.
@@ -35,7 +37,8 @@ import org.springframework.lang.Nullable;
 public interface ConfigurableWebEnvironment extends ConfigurableEnvironment {
 
 	/**
-	 * Replace any {@linkplain
+	 * 使用给定的参数将任何充当占位符的存根属性源实例替换为真实的 servlet 上下文/配置属性源。
+	 * <p>Replace any {@linkplain
 	 * org.springframework.core.env.PropertySource.StubPropertySource stub property source}
 	 * instances acting as placeholders with real servlet context/config property sources
 	 * using the given parameters.

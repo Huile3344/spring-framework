@@ -31,7 +31,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 
 /**
- * {@link Environment} implementation to be used by {@code Servlet}-based web
+ * 基于 Servlet 的 Web 应用程序要使用的环境实现。所有与 Web 相关的（基于 servlet）ApplicationContext
+ * 类默认都会初始化一个实例。
+ * <p>提供 ServletConfig、ServletContext 和基于 JNDI 的 PropertySource 实例。有关详细信息，
+ * 请参阅 customizePropertySources 方法文档。
+ *
+ * <p>{@link Environment} implementation to be used by {@code Servlet}-based web
  * applications. All web-related (servlet-based) {@code ApplicationContext} classes
  * initialize an instance by default.
  *
@@ -46,23 +51,33 @@ import org.springframework.web.context.ConfigurableWebEnvironment;
  */
 public class StandardServletEnvironment extends StandardEnvironment implements ConfigurableWebEnvironment {
 
-	/** Servlet context init parameters property source name: {@value}. */
+	/**
+	 * Servlet 上下文初始化参数属性源名称：“servletContextInitParams”。
+	 * <p>Servlet context init parameters property source name: {@value}.
+	 */
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
 
-	/** Servlet config init parameters property source name: {@value}. */
+	/**
+	 * Servlet 配置初始化参数属性源名称：“servletConfigInitParams”
+	 * <p>Servlet config init parameters property source name: {@value}.
+	 */
 	public static final String SERVLET_CONFIG_PROPERTY_SOURCE_NAME = "servletConfigInitParams";
 
 	/** JNDI property source name: {@value}. */
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
 
 
-	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
+	/**
+	 * 对 JDK 9+ 的 JNDI API 的防御性引用（可选 java.naming 模块）
+	 * <p>Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
+ 	 */
 	private static final boolean jndiPresent = ClassUtils.isPresent(
 			"javax.naming.InitialContext", StandardServletEnvironment.class.getClassLoader());
 
 
 	/**
-	 * Create a new {@code StandardServletEnvironment} instance.
+	 * 对 JDK 9+ 的 JNDI API 的防御性引用（可选 java.naming 模块）
+	 * <p>Create a new {@code StandardServletEnvironment} instance.
 	 */
 	public StandardServletEnvironment() {
 	}
@@ -78,7 +93,19 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 
 
 	/**
-	 * Customize the set of property sources with those contributed by superclasses as
+	 * 使用超类提供的属性源以及适用于标准 servlet 环境的属性源来自定义属性源集：
+	 * <ul>
+	 * <li>“servletConfigInitParams”
+	 * <li>“servletContextInitParams”
+	 * <li>“jndiProperties”
+	 * </ul>
+	 * <p>“servletConfigInitParams”中的属性将优先于“servletContextInitParams”中的属性，
+	 * 并且上述任一属性中的属性优先于“jndiProperties”中的属性。
+	 * <p>上述任何属性都将优先于 StandardEnvironment 超类提供的系统属性和环境变量。
+	 * <p>在此阶段，与 Servlet 相关的属性源作为存根添加，一旦实际的 ServletContext 对象可用，就会完全初始化。
+	 * <p>可以使用 JndiLocatorDelegate.IGNORE_JNDI_PROPERTY_NAME 禁用“jndiProperties”的添加。
+	 *
+	 * <p>Customize the set of property sources with those contributed by superclasses as
 	 * well as those appropriate for standard servlet-based environments:
 	 * <ul>
 	 * <li>{@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME}
